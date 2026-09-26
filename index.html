@@ -2,23 +2,11 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>UTE UNIDAD DE TRASLADO ELDORADO - Sistema Integrado</title>
-  <!-- Tailwind CSS -->
+  <title>UNIDAD DE TRASLADO ELDORADOs</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- html2pdf.js para exportar PDF -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-  <!-- Lucide Icons -->
-  <script src="https://unpkg.com/lucide@latest"></script>
-
   <style>
-<!DOCTYPE html>
-<html lang="es">
-<head>
-  <meta charset="UTF-8">
-  <title>Historia Clínica 107</title>
-  <style>
-canvas { touch-action: none; }
+    canvas { touch-action: none; }
     .body-canvas-container {
       position: relative;
       width: 140px;
@@ -43,11 +31,8 @@ canvas { touch-action: none; }
     }
   </style>
 </head>
-  </style>
-</head>
 <body class="bg-slate-100 text-slate-800 min-h-screen font-sans">
 
-  <!-- ==================== CONTENEDOR DE AUTENTICACIÓN ==================== -->
   <div id="auth-container" class="max-w-md mx-auto my-12 p-6 bg-white rounded-xl shadow-xl border border-slate-200">
     <div class="text-center mb-6">
       <div class="inline-flex p-3 bg-red-100 rounded-full text-red-600 mb-2">
@@ -57,7 +42,6 @@ canvas { touch-action: none; }
       <p class="text-xs text-slate-500 font-semibold uppercase tracking-wider">Sistema de Registro Prehospitalario y Gestión de Móviles</p>
     </div>
 
-    <!-- Acceso Rápido -->
     <div class="space-y-2 mb-6">
       <button onclick="window.loginWithGoogle()" class="w-full flex items-center justify-center gap-3 bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 font-bold py-2.5 px-4 rounded-lg shadow-sm transition text-xs">
         <svg class="w-4 h-4" viewBox="0 0 24 24">
@@ -159,9 +143,7 @@ canvas { touch-action: none; }
         <button onclick="window.downloadPDF('form-historia-clinica', 'Historia_Clinica_Prehospitalaria_107.pdf')" class="bg-slate-800 hover:bg-slate-900 text-white font-bold text-xs px-4 py-2 rounded-lg shadow flex items-center gap-2">
           <i data-lucide="download" class="w-4 h-4"></i> Descargar PDF
         </button>
-        <button onclick="window.sendPDFByEmail('form-historia-clinica', 'Historia_Clinica_Prehospitalaria_107.pdf', 'Historia Clinica 107 - UTE Eldorado')" class="bg-red-600 hover:bg-red-700 text-white font-bold text-xs px-4 py-2 rounded-lg shadow flex items-center gap-2">
-          <i data-lucide="mail" class="w-4 h-4"></i> Enviar por Correo (PDF)
-        </button>
+      <button onclick="window.sendPDFToDrive('form-historia-clinica', window.generarNombreConFecha('Historia_Clinica_Prehospitalaria_107'), 'Historia Clinica 107 - UTE Eldorado')" class="bg-red-600 hover:bg-red-700 text-white font-bold text-xs px-4 py-2 rounded-lg shadow flex items-center gap-2"><i data-lucide="cloud-upload" class="w-4 h-4"></i> Subir a Google Drive</button>
       </div>
 
       <form id="form-historia-clinica" class="bg-white p-6 rounded-xl shadow-lg border border-slate-200 space-y-6 text-xs">
@@ -182,7 +164,7 @@ canvas { touch-action: none; }
 
         <!-- Encabezado Ficha -->
         <div class="grid grid-cols-2 md:grid-cols-5 gap-3 bg-slate-50 p-3 rounded-lg border">
-          <div><label class="block font-bold text-slate-600">N° Emergencia</label><input type="text" class="w-full p-1.5 border rounded bg-white mt-1"></div>
+          <div><label class="block font-bold text-slate-600">N° Emergencia</label><input type="text" id="num-emergencia" class="w-full p-1.5 border rounded bg-white mt-1"></div>
           <div><label class="block font-bold text-slate-600">N° Intervención</label><input type="text" class="w-full p-1.5 border rounded bg-white mt-1"></div>
           <div><label class="block font-bold text-slate-600">Ambulancia N°</label><input type="text" class="w-full p-1.5 border rounded bg-white mt-1"></div>
           <div>
@@ -397,9 +379,9 @@ canvas { touch-action: none; }
         <button onclick="window.downloadPDF('form-ficha-relevo', 'Ficha_Relevo_Moviles.pdf')" class="bg-slate-800 hover:bg-slate-900 text-white font-bold text-xs px-4 py-2 rounded-lg shadow flex items-center gap-2">
           <i data-lucide="download" class="w-4 h-4"></i> Descargar PDF
         </button>
-        <button onclick="window.sendPDFByEmail('form-ficha-relevo', 'Ficha_Relevo_Moviles.pdf', 'Ficha Relevo de Moviles - UTE Eldorado')" class="bg-red-600 hover:bg-red-700 text-white font-bold text-xs px-4 py-2 rounded-lg shadow flex items-center gap-2">
-          <i data-lucide="mail" class="w-4 h-4"></i> Enviar por Correo (PDF)
-        </button>
+        <button onclick="window.sendPDFToDrive('form-ficha-relevo', 'Ficha_Relevo_Moviles.pdf', 'Ficha Relevo de Móviles - UTE Eldorado')" class="bg-red-600 hover:bg-red-700 text-white font-bold text-xs px-4 py-2 rounded-lg shadow flex items-center gap-2">
+  <i data-lucide="cloud-upload" class="w-4 h-4"></i> Subir a Google Drive
+</button>
       </div>
 
       <form id="form-ficha-relevo" class="bg-white p-6 rounded-xl shadow-lg border border-slate-200 space-y-6 text-xs">
@@ -505,14 +487,14 @@ canvas { touch-action: none; }
       </form>
     </div>
 
-    <!-- ==================== VISTA 3: CHOFER - PLANILLA MOVIMIENTO DE MÓVIL ==================== -->
+<!-- ==================== VISTA 3: CHOFER - PLANILLA MOVIMIENTO DE MÓVIL ==================== -->
     <div id="view-chofer-movimiento" class="hidden">
       <div class="flex justify-end gap-2 mb-3">
         <button onclick="window.downloadPDF('form-movimiento-movil', 'Planilla_Movimiento_Movil.pdf')" class="bg-slate-800 hover:bg-slate-900 text-white font-bold text-xs px-4 py-2 rounded-lg shadow flex items-center gap-2">
           <i data-lucide="download" class="w-4 h-4"></i> Descargar PDF
         </button>
-        <button onclick="window.sendPDFByEmail('form-movimiento-movil', 'Planilla_Movimiento_Movil.pdf', 'Planilla Movimiento de Movil - UTE Eldorado')" class="bg-red-600 hover:bg-red-700 text-white font-bold text-xs px-4 py-2 rounded-lg shadow flex items-center gap-2">
-          <i data-lucide="mail" class="w-4 h-4"></i> Enviar por Correo (PDF)
+        <button onclick="window.sendPDFToDrive('form-movimiento-movil', 'Planilla_Movimiento_Movil.pdf', 'Planilla Movimiento de Móvil - UTE Eldorado')" class="bg-red-600 hover:bg-red-700 text-white font-bold text-xs px-4 py-2 rounded-lg shadow flex items-center gap-2">
+          <i data-lucide="cloud-upload" class="w-4 h-4"></i> Subir a Google Drive
         </button>
       </div>
 
@@ -539,7 +521,12 @@ canvas { touch-action: none; }
 
         <!-- Tabla Movimientos -->
         <div class="bg-slate-50 p-3 rounded-lg border space-y-3 overflow-x-auto">
-          <h2 class="font-bold text-slate-700 uppercase border-b pb-1">Registro de Salidas y Regresos</h2>
+          <div class="flex justify-between items-center border-b pb-1">
+  <h2 class="font-bold text-slate-700 uppercase">Registro de Salidas y Regresos</h2>
+  <button type="button" onclick="window.agregarFilaTablaMovimientos()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs px-2.5 py-1 rounded shadow flex items-center gap-1 transition-all">
+    <span class="text-base font-bold">+</span> Agregar Fila
+  </button>
+</div>
           <table class="w-full text-left border-collapse min-w-[700px]">
             <thead>
               <tr class="bg-slate-200 text-slate-700 font-bold">
@@ -559,28 +546,29 @@ canvas { touch-action: none; }
                 <th class="p-1 border">Kms.</th>
               </tr>
             </thead>
-            <tbody>
-              <tr>
-                <td class="border p-1"><input type="time" class="w-full p-1 bg-white border rounded"></td>
-                <td class="border p-1"><input type="number" class="w-full p-1 bg-white border rounded"></td>
-                <td class="border p-1"><input type="text" class="w-full p-1 bg-white border rounded"></td>
-                <td class="border p-1"><input type="time" class="w-full p-1 bg-white border rounded"></td>
-                <td class="border p-1"><input type="number" class="w-full p-1 bg-white border rounded"></td>
-                <td class="border p-1"><input type="text" class="w-full p-1 bg-white border rounded"></td>
-                <td class="border p-1"><input type="time" class="w-full p-1 bg-white border rounded"></td>
-                <td class="border p-1"><input type="number" class="w-full p-1 bg-white border rounded"></td>
-              </tr>
-              <tr>
-                <td class="border p-1"><input type="time" class="w-full p-1 bg-white border rounded"></td>
-                <td class="border p-1"><input type="number" class="w-full p-1 bg-white border rounded"></td>
-                <td class="border p-1"><input type="text" class="w-full p-1 bg-white border rounded"></td>
-                <td class="border p-1"><input type="time" class="w-full p-1 bg-white border rounded"></td>
-                <td class="border p-1"><input type="number" class="w-full p-1 bg-white border rounded"></td>
-                <td class="border p-1"><input type="text" class="w-full p-1 bg-white border rounded"></td>
-                <td class="border p-1"><input type="time" class="w-full p-1 bg-white border rounded"></td>
-                <td class="border p-1"><input type="number" class="w-full p-1 bg-white border rounded"></td>
-              </tr>
-            </tbody>
+            <tbody id="tbody-movimientos">
+  <!-- Aquí están tus filas originales -->
+  <tr>
+    <td class="border p-1"><input type="time" class="w-full p-1 bg-white border rounded"></td>
+    <td class="border p-1"><input type="number" class="w-full p-1 bg-white border rounded"></td>
+    <td class="border p-1"><input type="text" class="w-full p-1 bg-white border rounded"></td>
+    <td class="border p-1"><input type="time" class="w-full p-1 bg-white border rounded"></td>
+    <td class="border p-1"><input type="number" class="w-full p-1 bg-white border rounded"></td>
+    <td class="border p-1"><input type="text" class="w-full p-1 bg-white border rounded"></td>
+    <td class="border p-1"><input type="time" class="w-full p-1 bg-white border rounded"></td>
+    <td class="border p-1"><input type="number" class="w-full p-1 bg-white border rounded"></td>
+  </tr>
+  <tr>
+    <td class="border p-1"><input type="time" class="w-full p-1 bg-white border rounded"></td>
+    <td class="border p-1"><input type="number" class="w-full p-1 bg-white border rounded"></td>
+    <td class="border p-1"><input type="text" class="w-full p-1 bg-white border rounded"></td>
+    <td class="border p-1"><input type="time" class="w-full p-1 bg-white border rounded"></td>
+    <td class="border p-1"><input type="number" class="w-full p-1 bg-white border rounded"></td>
+    <td class="border p-1"><input type="text" class="w-full p-1 bg-white border rounded"></td>
+    <td class="border p-1"><input type="time" class="w-full p-1 bg-white border rounded"></td>
+    <td class="border p-1"><input type="number" class="w-full p-1 bg-white border rounded"></td>
+  </tr>
+</tbody>
           </table>
         </div>
 
@@ -815,16 +803,140 @@ canvas { touch-action: none; }
       html2pdf().set({ margin: 0.2, filename, image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2 } }).from(element).save();
     };
 
-    window.sendPDFByEmail = function(formId, filename, subjectText) {
-      const element = document.getElementById(formId);
-      html2pdf().set({ margin: 0.2, filename, image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2 } }).from(element).save().then(() => {
-        const email = prompt("Ingrese la dirección de correo destino:");
-        if (email) {
-          const body = encodeURIComponent(`Adjunto PDF de la planilla generada desde la app UTE ELDORADO.\nFecha: ${new Date().toLocaleString('es-AR')}`);
-          window.location.href = `mailto:${email}?subject=${encodeURIComponent(subjectText)}&body=${body}`;
-        }
-      });
+    // URL Google Apps Script
+    const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbx2KtLEkQlUztTRfDJzqNld9t3skGdbYRyMSrG48rmhCD5cLxC5C3m-pTeQs1Qv4HSV/exec';
+
+// 1. Función global para generar nombres con fecha y hora
+    window.generarNombreConFecha = function(prefijo) {
+      const ahora = new Date();
+      const dia = String(ahora.getDate()).padStart(2, '0');
+      const mes = String(ahora.getMonth() + 1).padStart(2, '0');
+      const anio = ahora.getFullYear();
+      const hora = String(ahora.getHours()).padStart(2, '0');
+      const minutos = String(ahora.getMinutes()).padStart(2, '0');
+      
+      return `${prefijo}_${dia}-${mes}-${anio}_${hora}-${minutos}.pdf`;
     };
-  </script>
+
+    // 2. Función global para el contador autoincrementable
+    window.incrementarContadorEmergencia = function() {
+      let ultimoNum = parseInt(localStorage.getItem('ute_contador_emergencia') || '0');
+      let siguienteNum = ultimoNum + 1;
+      localStorage.setItem('ute_contador_emergencia', siguienteNum);
+      
+      const inputEmergencia = document.getElementById('num-emergencia');
+      if (inputEmergencia) {
+        inputEmergencia.value = siguienteNum;
+      }
+    };
+
+    // Inicializar el número al cargar la página por primera vez
+    document.addEventListener("DOMContentLoaded", () => {
+      let ultimoNum = parseInt(localStorage.getItem('ute_contador_emergencia') || '0');
+      const inputEmergencia = document.getElementById('num-emergencia');
+      if (inputEmergencia && !inputEmergencia.value) {
+        inputEmergencia.value = ultimoNum + 1;
+      }
+    });
+window.sendPDFToDrive = async function(formId, filename, subjectText) {
+      const eventButton = event ? event.currentTarget : null;
+      const originalHTML = eventButton ? eventButton.innerHTML : '';
+
+      if (eventButton) {
+        eventButton.disabled = true;
+        eventButton.className = "bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs px-4 py-2 rounded-lg shadow flex items-center gap-2 transition-all";
+        eventButton.innerHTML = `<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> Subiendo a Google Drive...`;
+        if (window.lucide) window.lucide.createIcons();
+      }
+
+      try {
+        const element = document.getElementById(formId);
+
+        const pdfWorker = html2pdf().set({ 
+          margin: 0.2, 
+          filename: filename, 
+          image: { type: 'jpeg', quality: 0.98 }, 
+          html2canvas: { scale: 2 } 
+        }).from(element);
+
+        const pdfBase64 = await pdfWorker.outputPdf('datauristring');
+        const base64Data = pdfBase64.split(',')[1];
+
+        const payload = {
+          fileName: filename,
+          fileData: base64Data,
+          subject: subjectText,
+          timestamp: new Date().toISOString()
+        };
+
+        await fetch(GOOGLE_SCRIPT_URL, {
+          method: 'POST',
+          mode: 'no-cors',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(payload)
+        });
+
+        alert("¡Planilla guardada y subida exitosamente a Google Drive!");
+
+        // --- Limpieza, incremento de número y reseteo de canvas/mapa ---
+        if (formId === 'form-historia-clinica') {
+          incrementarContadorEmergencia(); // Sube el número en 1 y lo actualiza
+          document.getElementById(formId).reset(); // Limpia campos de texto
+          
+          if (typeof window.clearDamagePoints === 'function') window.clearDamagePoints();
+          if (typeof window.clearCanvas === 'function') {
+            window.clearCanvas('canvas-paramedico');
+            window.clearCanvas('canvas-medico-rec');
+            window.clearCanvas('canvas-familiar-rec');
+          }
+          if (typeof updateTimestamps === 'function') updateTimestamps();
+        }
+
+      } catch (error) {
+        console.error("Error al subir a Drive:", error);
+        alert("Hubo un error al subir el archivo a Google Drive: " + error.message);
+      } finally {
+        if (eventButton) {
+          eventButton.disabled = false;
+          eventButton.className = "bg-red-600 hover:bg-red-700 text-white font-bold text-xs px-4 py-2 rounded-lg shadow flex items-center gap-2 transition-all";
+          eventButton.innerHTML = originalHTML;
+          if (window.lucide) window.lucide.createIcons();
+        }
+        document.addEventListener("DOMContentLoaded", () => {
+      let ultimoNum = parseInt(localStorage.getItem('ute_contador_emergencia') || '0');
+      // Si el contador está en 0, lo dejamos en 1 para empezar
+      if (ultimoNum === 0) {
+        ultimoNum = 1;
+        localStorage.setItem('ute_contador_emergencia', 1);
+      }
+      
+      const inputEmergencia = document.getElementById('num-emergencia');
+      if (inputEmergencia && !inputEmergencia.value) {
+        inputEmergencia.value = ultimoNum;
+      }
+    });
+      }
+    };
+    window.agregarFilaTablaMovimientos = function() {
+      const tbody = document.getElementById('tbody-movimientos');
+      if (!tbody) return;
+
+      const nuevaFila = document.createElement('tr');
+      nuevaFila.innerHTML = `
+        <td class="border p-1"><input type="time" class="w-full p-1 bg-white border rounded"></td>
+        <td class="border p-1"><input type="number" class="w-full p-1 bg-white border rounded"></td>
+        <td class="border p-1"><input type="text" class="w-full p-1 bg-white border rounded"></td>
+        <td class="border p-1"><input type="time" class="w-full p-1 bg-white border rounded"></td>
+        <td class="border p-1"><input type="number" class="w-full p-1 bg-white border rounded"></td>
+        <td class="border p-1"><input type="text" class="w-full p-1 bg-white border rounded"></td>
+        <td class="border p-1"><input type="time" class="w-full p-1 bg-white border rounded"></td>
+        <td class="border p-1"><input type="number" class="w-full p-1 bg-white border rounded"></td>
+      `;
+
+      tbody.appendChild(nuevaFila);
+    };
+    </script>
 </body>
 </html>
