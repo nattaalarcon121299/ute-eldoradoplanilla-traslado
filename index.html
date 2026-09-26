@@ -10,10 +10,6 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
   <!-- Lucide Icons -->
   <script src="https://unpkg.com/lucide@latest"></script>
-  <!-- Firebase SDKs (v9 Compat) -->
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
   <style>
     canvas { touch-action: none; }
@@ -44,12 +40,12 @@
 
     <!-- Pestañas Login / Registro -->
     <div class="flex border-b mb-6 text-sm font-bold">
-      <button id="tab-login" onclick="showAuthTab('login')" class="w-1/2 py-2 text-red-600 border-b-2 border-red-600">Iniciar Sesión</button>
-      <button id="tab-register" onclick="showAuthTab('register')" class="w-1/2 py-2 text-slate-400 border-b-2 border-transparent">Registrarse</button>
+      <button id="tab-login" onclick="window.showAuthTab('login')" class="w-1/2 py-2 text-red-600 border-b-2 border-red-600">Iniciar Sesión</button>
+      <button id="tab-register" onclick="window.showAuthTab('register')" class="w-1/2 py-2 text-slate-400 border-b-2 border-transparent">Registrarse</button>
     </div>
 
     <!-- Formulario Iniciar Sesión -->
-    <form id="login-form" onsubmit="handleLogin(event)" class="space-y-4">
+    <form id="login-form" onsubmit="window.handleLogin(event)" class="space-y-4">
       <div>
         <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Correo Electrónico</label>
         <input type="email" id="login-email" required placeholder="correo@ejemplo.com" class="w-full p-2.5 text-sm border rounded-lg focus:ring-2 focus:ring-red-500 outline-none">
@@ -66,7 +62,7 @@
     </form>
 
     <!-- Formulario Registro -->
-    <form id="register-form" onsubmit="handleRegister(event)" class="space-y-4 hidden">
+    <form id="register-form" onsubmit="window.handleRegister(event)" class="space-y-4 hidden">
       <div>
         <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Nombre y Apellido</label>
         <input type="text" id="reg-name" required class="w-full p-2.5 text-sm border rounded-lg focus:ring-2 focus:ring-red-500 outline-none">
@@ -108,21 +104,24 @@
         </div>
       </div>
       <div class="space-x-2">
-        <button onclick="logout()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 text-xs font-bold px-4 py-2 rounded-lg transition">Cerrar Sesión</button>
+        <button onclick="window.logout()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 text-xs font-bold px-4 py-2 rounded-lg transition">Cerrar Sesión</button>
       </div>
     </div>
 
     <!-- Navegación de Vistas según Rol de Chofer -->
     <div id="nav-chofer" class="hidden flex space-x-2 mb-6 border-b pb-3">
-      <button id="btn-nav-relevo" onclick="switchChoferView('relevo')" class="px-4 py-2 text-sm font-bold bg-red-600 text-white rounded-lg shadow">1. Ficha Relevo de Móviles</button>
-      <button id="btn-nav-movimiento" onclick="switchChoferView('movimiento')" class="px-4 py-2 text-sm font-bold bg-slate-200 text-slate-700 rounded-lg">2. Planilla Movimiento de Móvil</button>
+      <button id="btn-nav-relevo" onclick="window.switchChoferView('relevo')" class="px-4 py-2 text-sm font-bold bg-red-600 text-white rounded-lg shadow">1. Ficha Relevo de Móviles</button>
+      <button id="btn-nav-movimiento" onclick="window.switchChoferView('movimiento')" class="px-4 py-2 text-sm font-bold bg-slate-200 text-slate-700 rounded-lg">2. Planilla Movimiento de Móvil</button>
     </div>
 
     <!-- ==================== VISTA 1: PERSONAL DE SALUD ==================== -->
     <div id="view-salud" class="hidden">
-      <div class="flex justify-end mb-3">
-        <button onclick="downloadPDF('form-historia-clinica', 'Historia_Clinica_Prehospitalaria.pdf')" class="bg-red-600 hover:bg-red-700 text-white font-bold text-xs px-4 py-2 rounded-lg shadow flex items-center gap-2">
-          <i data-lucide="download" class="w-4 h-4"></i> Exportar a PDF
+      <div class="flex justify-end gap-2 mb-3">
+        <button onclick="window.downloadPDF('form-historia-clinica', 'Historia_Clinica_Prehospitalaria.pdf')" class="bg-slate-800 hover:bg-slate-900 text-white font-bold text-xs px-4 py-2 rounded-lg shadow flex items-center gap-2">
+          <i data-lucide="download" class="w-4 h-4"></i> Descargar PDF
+        </button>
+        <button onclick="window.sendPDFByEmail('form-historia-clinica', 'Historia_Clinica_Prehospitalaria.pdf', 'Historia Clinica Prehospitalaria - UTE Eldorado')" class="bg-red-600 hover:bg-red-700 text-white font-bold text-xs px-4 py-2 rounded-lg shadow flex items-center gap-2">
+          <i data-lucide="mail" class="w-4 h-4"></i> Enviar por Correo (PDF)
         </button>
       </div>
 
@@ -179,17 +178,17 @@
             <div>
               <label class="block font-bold text-slate-600 mb-1">Paramédico / Interviniente</label>
               <canvas id="canvas-paramedico" width="220" height="90" class="border rounded bg-white mx-auto"></canvas>
-              <button type="button" onclick="clearCanvas('canvas-paramedico')" class="text-[10px] text-red-600 underline mt-1">Limpiar</button>
+              <button type="button" onclick="window.clearCanvas('canvas-paramedico')" class="text-[10px] text-red-600 underline mt-1">Limpiar</button>
             </div>
             <div>
               <label class="block font-bold text-slate-600 mb-1">Médico Receptante</label>
               <canvas id="canvas-medico-rec" width="220" height="90" class="border rounded bg-white mx-auto"></canvas>
-              <button type="button" onclick="clearCanvas('canvas-medico-rec')" class="text-[10px] text-red-600 underline mt-1">Limpiar</button>
+              <button type="button" onclick="window.clearCanvas('canvas-medico-rec')" class="text-[10px] text-red-600 underline mt-1">Limpiar</button>
             </div>
             <div>
               <label class="block font-bold text-slate-600 mb-1">Familiar / Responsable</label>
               <canvas id="canvas-familiar-rec" width="220" height="90" class="border rounded bg-white mx-auto"></canvas>
-              <button type="button" onclick="clearCanvas('canvas-familiar-rec')" class="text-[10px] text-red-600 underline mt-1">Limpiar</button>
+              <button type="button" onclick="window.clearCanvas('canvas-familiar-rec')" class="text-[10px] text-red-600 underline mt-1">Limpiar</button>
             </div>
           </div>
         </div>
@@ -198,9 +197,12 @@
 
     <!-- ==================== VISTA 2: CHOFER - FICHA DE RELEVO ==================== -->
     <div id="view-chofer-relevo" class="hidden">
-      <div class="flex justify-end mb-3">
-        <button onclick="downloadPDF('form-ficha-relevo', 'Ficha_Relevo_Movil.pdf')" class="bg-red-600 hover:bg-red-700 text-white font-bold text-xs px-4 py-2 rounded-lg shadow flex items-center gap-2">
-          <i data-lucide="download" class="w-4 h-4"></i> Exportar a PDF
+      <div class="flex justify-end gap-2 mb-3">
+        <button onclick="window.downloadPDF('form-ficha-relevo', 'Ficha_Relevo_Movil.pdf')" class="bg-slate-800 hover:bg-slate-900 text-white font-bold text-xs px-4 py-2 rounded-lg shadow flex items-center gap-2">
+          <i data-lucide="download" class="w-4 h-4"></i> Descargar PDF
+        </button>
+        <button onclick="window.sendPDFByEmail('form-ficha-relevo', 'Ficha_Relevo_Movil.pdf', 'Ficha Relevo de Moviles - UTE Eldorado')" class="bg-red-600 hover:bg-red-700 text-white font-bold text-xs px-4 py-2 rounded-lg shadow flex items-center gap-2">
+          <i data-lucide="mail" class="w-4 h-4"></i> Enviar por Correo (PDF)
         </button>
       </div>
 
@@ -227,12 +229,12 @@
             <div>
               <label class="block font-bold text-slate-600 mb-1">Firma Chofer Entrante</label>
               <canvas id="canvas-chofer-entrante" width="220" height="80" class="border rounded bg-white mx-auto"></canvas>
-              <button type="button" onclick="clearCanvas('canvas-chofer-entrante')" class="text-[10px] text-red-600 underline mt-1">Limpiar</button>
+              <button type="button" onclick="window.clearCanvas('canvas-chofer-entrante')" class="text-[10px] text-red-600 underline mt-1">Limpiar</button>
             </div>
             <div>
               <label class="block font-bold text-slate-600 mb-1">Firma Chofer Saliente</label>
               <canvas id="canvas-chofer-saliente" width="220" height="80" class="border rounded bg-white mx-auto"></canvas>
-              <button type="button" onclick="clearCanvas('canvas-chofer-saliente')" class="text-[10px] text-red-600 underline mt-1">Limpiar</button>
+              <button type="button" onclick="window.clearCanvas('canvas-chofer-saliente')" class="text-[10px] text-red-600 underline mt-1">Limpiar</button>
             </div>
           </div>
         </div>
@@ -241,9 +243,12 @@
 
     <!-- ==================== VISTA 3: CHOFER - MOVIMIENTO ==================== -->
     <div id="view-chofer-movimiento" class="hidden">
-      <div class="flex justify-end mb-3">
-        <button onclick="downloadPDF('form-movimiento-movil', 'Planilla_Movimiento_Movil.pdf')" class="bg-red-600 hover:bg-red-700 text-white font-bold text-xs px-4 py-2 rounded-lg shadow flex items-center gap-2">
-          <i data-lucide="download" class="w-4 h-4"></i> Exportar a PDF
+      <div class="flex justify-end gap-2 mb-3">
+        <button onclick="window.downloadPDF('form-movimiento-movil', 'Planilla_Movimiento_Movil.pdf')" class="bg-slate-800 hover:bg-slate-900 text-white font-bold text-xs px-4 py-2 rounded-lg shadow flex items-center gap-2">
+          <i data-lucide="download" class="w-4 h-4"></i> Descargar PDF
+        </button>
+        <button onclick="window.sendPDFByEmail('form-movimiento-movil', 'Planilla_Movimiento_Movil.pdf', 'Planilla Movimiento de Movil - UTE Eldorado')" class="bg-red-600 hover:bg-red-700 text-white font-bold text-xs px-4 py-2 rounded-lg shadow flex items-center gap-2">
+          <i data-lucide="mail" class="w-4 h-4"></i> Enviar por Correo (PDF)
         </button>
       </div>
 
@@ -261,40 +266,50 @@
         <div class="bg-slate-50 p-3 rounded-lg border text-center space-y-2">
           <label class="block font-bold text-slate-600">Firma del Chofer</label>
           <canvas id="canvas-chofer-mov" width="220" height="80" class="border rounded bg-white mx-auto"></canvas>
-          <button type="button" onclick="clearCanvas('canvas-chofer-mov')" class="text-[10px] text-red-600 underline">Limpiar Firma</button>
+          <button type="button" onclick="window.clearCanvas('canvas-chofer-mov')" class="text-[10px] text-red-600 underline">Limpiar Firma</button>
         </div>
       </form>
     </div>
 
   </div>
 
-  <script>
-    // Inicializar Iconos
-    lucide.createIcons();
+  <!-- FIREBASE V10 SDK Y LÓGICA DE LA APLICACIÓN -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
+    import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-analytics.js";
+    import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-auth.js";
+    import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
 
-    // CONFIGURACIÓN DE FIREBASE (Reemplaza con los datos de tu consola de Firebase)
+    // Configuración oficial de tu proyecto Firebase
     const firebaseConfig = {
-      apiKey: "AIzaSyYOUR_API_KEY_HERE",
-      authDomain: "tu-proyecto.firebaseapp.com",
-      projectId: "tu-proyecto",
-      storageBucket: "tu-proyecto.appspot.com",
-      messagingSenderId: "123456789",
-      appId: "1:123456789:web:abc123def456"
+      apiKey: "AIzaSyByIDJthB3pJtzW5ydWyyqpQ-9b39vJ_V8",
+      authDomain: "unidad-de-traslado-eldorado.firebaseapp.com",
+      projectId: "unidad-de-traslado-eldorado",
+      storageBucket: "unidad-de-traslado-eldorado.firebasestorage.app",
+      messagingSenderId: "825508725058",
+      appId: "1:825508725058:web:e8b487e8e9677bb5d808db",
+      measurementId: "G-H1B7EKJXJ3"
     };
 
-    firebase.initializeApp(firebaseConfig);
-    const auth = firebase.auth();
-    const db = firebase.firestore();
+    // Inicializar Firebase y Servicios
+    const app = initializeApp(firebaseConfig);
+    const analytics = getAnalytics(app);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
 
-    // Mantener la sesión iniciada en el servidor
-    auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
+    // Inicializar Iconos Lucide
+    if (window.lucide) {
+      window.lucide.createIcons();
+    }
 
-    // Escuchar el estado de autenticación
-    auth.onAuthStateChanged(async (user) => {
+    // Escuchar el estado de autenticación de usuario
+    onAuthStateChanged(auth, async (user) => {
       if (user) {
-        const doc = await db.collection("users").doc(user.uid).get();
-        if (doc.exists) {
-          const userData = doc.data();
+        const userDocRef = doc(db, "users", user.uid);
+        const userDoc = await getDoc(userDocRef);
+
+        if (userDoc.exists()) {
+          const userData = userDoc.data();
           document.getElementById('auth-container').classList.add('hidden');
           document.getElementById('app-container').classList.remove('hidden');
           document.getElementById('user-display-name').innerText = userData.name;
@@ -304,7 +319,7 @@
 
           if (userData.role === 'chofer') {
             document.getElementById('nav-chofer').classList.remove('hidden');
-            switchChoferView('relevo');
+            window.switchChoferView('relevo');
           } else {
             document.getElementById('view-salud').classList.remove('hidden');
             initCanvas('canvas-paramedico');
@@ -318,7 +333,8 @@
       }
     });
 
-    async function handleRegister(e) {
+    // Manejar el registro de usuario
+    window.handleRegister = async function(e) {
       e.preventDefault();
       const name = document.getElementById('reg-name').value;
       const email = document.getElementById('reg-email').value;
@@ -327,10 +343,10 @@
       const pass = document.getElementById('reg-pass').value;
 
       try {
-        const userCredential = await auth.createUserWithEmailAndPassword(email, pass);
+        const userCredential = await createUserWithEmailAndPassword(auth, email, pass);
         const user = userCredential.user;
 
-        await db.collection("users").doc(user.uid).set({
+        await setDoc(doc(db, "users", user.uid), {
           name: name,
           email: email,
           role: role,
@@ -342,25 +358,27 @@
       } catch (error) {
         alert("Error al registrarse: " + error.message);
       }
-    }
+    };
 
-    async function handleLogin(e) {
+    // Manejar el inicio de sesión
+    window.handleLogin = async function(e) {
       e.preventDefault();
       const email = document.getElementById('login-email').value;
       const pass = document.getElementById('login-pass').value;
 
       try {
-        await auth.signInWithEmailAndPassword(email, pass);
+        await signInWithEmailAndPassword(auth, email, pass);
       } catch (error) {
         alert("Error de acceso: " + error.message);
       }
-    }
+    };
 
-    function logout() {
-      auth.signOut().then(() => {
+    // Cerrar sesión
+    window.logout = function() {
+      signOut(auth).then(() => {
         location.reload();
       });
-    }
+    };
 
     function updateTimestamps() {
       const now = new Date();
@@ -370,7 +388,7 @@
       if(document.getElementById('movimiento-fecha-hora')) document.getElementById('movimiento-fecha-hora').value = str;
     }
 
-    function showAuthTab(tab) {
+    window.showAuthTab = function(tab) {
       if (tab === 'login') {
         document.getElementById('login-form').classList.remove('hidden');
         document.getElementById('register-form').classList.add('hidden');
@@ -382,9 +400,9 @@
         document.getElementById('tab-register').className = "w-1/2 py-2 text-red-600 border-b-2 border-red-600";
         document.getElementById('tab-login').className = "w-1/2 py-2 text-slate-400 border-b-2 border-transparent";
       }
-    }
+    };
 
-    function switchChoferView(view) {
+    window.switchChoferView = function(view) {
       document.getElementById('view-chofer-relevo').classList.add('hidden');
       document.getElementById('view-chofer-movimiento').classList.add('hidden');
 
@@ -396,7 +414,7 @@
         document.getElementById('view-chofer-movimiento').classList.remove('hidden');
         initCanvas('canvas-chofer-mov');
       }
-    }
+    };
 
     function initCanvas(id) {
       const canvas = document.getElementById(id);
@@ -428,18 +446,36 @@
       canvas.addEventListener('touchmove', draw);
     }
 
-    function clearCanvas(id) {
+    window.clearCanvas = function(id) {
       const canvas = document.getElementById(id);
       if(canvas) {
         const ctx = canvas.getContext('2d');
         ctx.clearRect(0, 0, canvas.width, canvas.height);
       }
-    }
+    };
 
-    function downloadPDF(formId, filename) {
+    // FUNCIONES DE PDF Y CORREO
+    window.downloadPDF = function(formId, filename) {
       const element = document.getElementById(formId);
       html2pdf().set({ margin: 0.2, filename: filename, image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2 } }).from(element).save();
-    }
+    };
+
+    window.sendPDFByEmail = function(formId, filename, subjectText) {
+      const element = document.getElementById(formId);
+      
+      // 1. Descarga la planilla lista en PDF
+      html2pdf().set({ margin: 0.2, filename: filename, image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2 } }).from(element).save().then(() => {
+        // 2. Solicita el correo de destino
+        const destinationEmail = prompt("Ingrese la dirección de correo a la que desea enviar la planilla:");
+        if (destinationEmail) {
+          const bodyText = encodeURIComponent(`Adjunto a este correo se encuentra la planilla registrada en formato PDF perteneciente a UTE UNIDAD DE TRASLADO ELDORADO.\n\nFecha de emisión: ${new Date().toLocaleString('es-AR')}`);
+          const subject = encodeURIComponent(subjectText);
+          
+          // 3. Abre la app de correo con destinatario y cuerpo
+          window.location.href = `mailto:${destinationEmail}?subject=${subject}&body=${bodyText}`;
+        }
+      });
+    };
   </script>
 </body>
 </html>
