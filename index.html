@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>UTE UNIDAD DE TRASLADO ELDORADO - Sistema Prehospitalario</title>
+  <title>UTE UNIDAD DE TRASLADO ELDORADO - Sistema Integrado</title>
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- html2pdf.js para exportar PDF -->
@@ -13,16 +13,27 @@
 
   <style>
     canvas { touch-action: none; }
-    .damage-point {
+    .body-canvas-container {
+      position: relative;
+      width: 140px;
+      height: 220px;
+      margin: 0 auto;
+      background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 200" fill="none" stroke="%23475569" stroke-width="2"><circle cx="50" cy="20" r="12"/><path d="M50 32 v60 M20 45 h60 M35 92 v80 M65 92 v80"/></svg>');
+      background-repeat: no-repeat;
+      background-position: center;
+      background-size: contain;
+      border: 1px dashed #cbd5e1;
+      border-radius: 8px;
+    }
+    .damage-dot {
       position: absolute;
-      width: 14px;
-      height: 14px;
+      width: 12px;
+      height: 12px;
       background-color: #ef4444;
       border: 2px solid #ffffff;
       border-radius: 50%;
       transform: translate(-50%, -50%);
-      box-shadow: 0 0 5px rgba(0,0,0,0.5);
-      cursor: pointer;
+      pointer-events: none;
     }
   </style>
 </head>
@@ -34,11 +45,11 @@
       <div class="inline-flex p-3 bg-red-100 rounded-full text-red-600 mb-2">
         <i data-lucide="ambulance" class="w-8 h-8"></i>
       </div>
-      <h1 class="text-2xl font-black text-slate-800 tracking-tight">UTE UNIDAD DE TRASLADO ELDORADO</h1>
+      <h1 class="text-xl font-black text-slate-800 tracking-tight">UTE UNIDAD DE TRASLADO ELDORADO</h1>
       <p class="text-xs text-slate-500 font-semibold uppercase tracking-wider">Sistema de Registro Prehospitalario y Gestión de Móviles</p>
     </div>
 
-    <!-- Botones de Acceso Rápido (Google y Apple) -->
+    <!-- Acceso Rápido -->
     <div class="space-y-2 mb-6">
       <button onclick="window.loginWithGoogle()" class="w-full flex items-center justify-center gap-3 bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 font-bold py-2.5 px-4 rounded-lg shadow-sm transition text-xs">
         <svg class="w-4 h-4" viewBox="0 0 24 24">
@@ -49,7 +60,6 @@
         </svg>
         Continuar con Google
       </button>
-
       <button onclick="window.loginWithApple()" class="w-full flex items-center justify-center gap-3 bg-black hover:bg-slate-900 text-white font-bold py-2.5 px-4 rounded-lg shadow-sm transition text-xs">
         <svg class="w-4 h-4 fill-current" viewBox="0 0 170 170">
           <path d="M150.37 130.25c-2.45 5.66-5.35 10.87-8.71 15.66-4.58 6.53-8.33 11.05-11.22 13.56-4.48 4.12-9.28 6.23-14.42 6.35-3.69 0-8.14-1.05-13.32-3.18-5.19-2.12-9.97-3.17-14.34-3.17-4.58 0-9.49 1.05-14.75 3.17-5.26 2.13-9.5 3.24-12.74 3.35-4.34.13-9.14-1.9-14.4-6.07-3.16-2.51-7.02-7.14-11.59-13.88-6.19-9.13-11.14-19.16-14.86-30.08-3.72-10.93-5.58-21.32-5.58-31.18 0-14.38 3.66-26.24 10.98-35.59 7.32-9.35 16.51-14.12 27.57-14.31 4.34 0 9.38 1.15 15.11 3.45 5.73 2.3 9.77 3.45 12.12 3.45 2.13 0 6.27-1.2 12.43-3.6 6.16-2.4 11.2-3.5 15.12-3.3 12.22.8 21.84 5.38 28.87 13.73-10.89 6.59-16.2 15.71-15.93 27.37.27 9.13 3.86 16.71 10.78 22.75 6.92 6.04 15.17 9.5 24.75 10.37-2.6 7.72-6.13 15.42-10.6 23.11zM119.22 31.08c0-7.39 2.72-14.48 8.16-21.27 5.44-6.79 12.28-10.8 20.52-12.03.13.93.2 1.8.2 2.6 0 7.25-2.8 14.48-8.4 21.68-5.6 7.2-12.59 11.27-20.97 12.21-.07-1.06-.14-2.12-.14-3.19z"/>
@@ -64,13 +74,12 @@
       <div class="flex-grow border-t border-slate-200"></div>
     </div>
 
-    <!-- Pestañas Login / Registro -->
     <div class="flex border-b mb-6 text-sm font-bold">
       <button id="tab-login" onclick="window.showAuthTab('login')" class="w-1/2 py-2 text-red-600 border-b-2 border-red-600">Iniciar Sesión</button>
       <button id="tab-register" onclick="window.showAuthTab('register')" class="w-1/2 py-2 text-slate-400 border-b-2 border-transparent">Registrarse</button>
     </div>
 
-    <!-- Formulario Iniciar Sesión -->
+    <!-- Login -->
     <form id="login-form" onsubmit="window.handleLogin(event)" class="space-y-4">
       <div>
         <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Correo Electrónico</label>
@@ -80,14 +89,10 @@
         <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Contraseña</label>
         <input type="password" id="login-pass" required class="w-full p-2.5 text-sm border rounded-lg focus:ring-2 focus:ring-red-500 outline-none">
       </div>
-      <div class="flex items-center">
-        <input type="checkbox" id="remember-me" class="rounded text-red-600" checked>
-        <label for="remember-me" class="ml-2 text-xs font-semibold text-slate-600">Mantenerme conectado en el servidor</label>
-      </div>
-      <button type="submit" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 rounded-lg shadow transition">Ingresar al Sistema</button>
+      <button type="submit" id="btn-login-submit" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 rounded-lg shadow transition">Ingresar al Sistema</button>
     </form>
 
-    <!-- Formulario Registro -->
+    <!-- Registro -->
     <form id="register-form" onsubmit="window.handleRegister(event)" class="space-y-4 hidden">
       <div>
         <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Nombre y Apellido</label>
@@ -105,14 +110,14 @@
         </select>
       </div>
       <div>
-        <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Matrícula Prof. / Licencia <span class="text-slate-400 font-normal">(Opcional)</span></label>
+        <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Matrícula Prof. / Licencia</label>
         <input type="text" id="reg-matricula" placeholder="N° de Matrícula o Licencia" class="w-full p-2.5 text-sm border rounded-lg focus:ring-2 focus:ring-red-500 outline-none">
       </div>
       <div>
         <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Contraseña</label>
         <input type="password" id="reg-pass" minlength="6" required class="w-full p-2.5 text-sm border rounded-lg focus:ring-2 focus:ring-red-500 outline-none">
       </div>
-      <button type="submit" class="w-full bg-slate-800 hover:bg-slate-900 text-white font-bold py-3 rounded-lg shadow transition">Crear Cuenta en Servidor</button>
+      <button type="submit" id="btn-register-submit" class="w-full bg-slate-800 hover:bg-slate-900 text-white font-bold py-3 rounded-lg shadow transition">Crear Cuenta</button>
     </form>
   </div>
 
@@ -125,75 +130,232 @@
           <i data-lucide="user-check" class="w-6 h-6"></i>
         </div>
         <div>
-          <h2 id="user-display-name" class="font-bold text-slate-800 text-base"></h2>
-          <span id="user-display-role" class="inline-block px-2 py-0.5 text-xs font-bold rounded bg-slate-100 text-slate-600 uppercase"></span>
+          <h2 id="user-display-name" class="font-bold text-slate-800 text-base">Cargando...</h2>
+          <span id="user-display-role" class="inline-block px-2 py-0.5 text-xs font-bold rounded bg-slate-100 text-slate-600 uppercase">-</span>
         </div>
       </div>
-      <div class="space-x-2">
+      <div>
         <button onclick="window.logout()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 text-xs font-bold px-4 py-2 rounded-lg transition">Cerrar Sesión</button>
       </div>
     </div>
 
-    <!-- Navegación de Vistas según Rol de Chofer -->
+    <!-- Navegación para Choferes -->
     <div id="nav-chofer" class="hidden flex space-x-2 mb-6 border-b pb-3">
       <button id="btn-nav-relevo" onclick="window.switchChoferView('relevo')" class="px-4 py-2 text-sm font-bold bg-red-600 text-white rounded-lg shadow">1. Ficha Relevo de Móviles</button>
       <button id="btn-nav-movimiento" onclick="window.switchChoferView('movimiento')" class="px-4 py-2 text-sm font-bold bg-slate-200 text-slate-700 rounded-lg">2. Planilla Movimiento de Móvil</button>
     </div>
 
-    <!-- ==================== VISTA 1: PERSONAL DE SALUD ==================== -->
+    <!-- ==================== VISTA 1: PERSONAL DE SALUD (HISTORIA CLÍNICA 107) ==================== -->
     <div id="view-salud" class="hidden">
       <div class="flex justify-end gap-2 mb-3">
-        <button onclick="window.downloadPDF('form-historia-clinica', 'Historia_Clinica_Prehospitalaria.pdf')" class="bg-slate-800 hover:bg-slate-900 text-white font-bold text-xs px-4 py-2 rounded-lg shadow flex items-center gap-2">
+        <button onclick="window.downloadPDF('form-historia-clinica', 'Historia_Clinica_Prehospitalaria_107.pdf')" class="bg-slate-800 hover:bg-slate-900 text-white font-bold text-xs px-4 py-2 rounded-lg shadow flex items-center gap-2">
           <i data-lucide="download" class="w-4 h-4"></i> Descargar PDF
         </button>
-        <button onclick="window.sendPDFByEmail('form-historia-clinica', 'Historia_Clinica_Prehospitalaria.pdf', 'Historia Clinica Prehospitalaria - UTE Eldorado')" class="bg-red-600 hover:bg-red-700 text-white font-bold text-xs px-4 py-2 rounded-lg shadow flex items-center gap-2">
+        <button onclick="window.sendPDFByEmail('form-historia-clinica', 'Historia_Clinica_Prehospitalaria_107.pdf', 'Historia Clinica 107 - UTE Eldorado')" class="bg-red-600 hover:bg-red-700 text-white font-bold text-xs px-4 py-2 rounded-lg shadow flex items-center gap-2">
           <i data-lucide="mail" class="w-4 h-4"></i> Enviar por Correo (PDF)
         </button>
       </div>
 
       <form id="form-historia-clinica" class="bg-white p-6 rounded-xl shadow-lg border border-slate-200 space-y-6 text-xs">
+        <!-- Encabezado Oficial -->
         <div class="border-b pb-4 flex justify-between items-start gap-4">
-          <div>
-            <h1 class="text-xl font-black text-slate-900 uppercase">UTE UNIDAD DE TRASLADO ELDORADO</h1>
-            <p class="text-sm font-bold text-red-600">Historia Clínica Prehospitalaria de Emergencias</p>
+          <div class="flex items-center gap-3">
+            <div class="w-12 h-12 bg-red-600 rounded-full flex items-center justify-center text-white font-black text-xl">107</div>
+            <div>
+              <h1 class="text-base font-black text-slate-900 uppercase">Gobierno de Misiones | Ministerio de Salud Pública</h1>
+              <p class="text-xs font-bold text-red-600">UNIDAD CENTRAL DE EMERGENCIAS Y TRASLADOS - HISTORIA CLÍNICA PREHOSPITALARIA</p>
+            </div>
           </div>
-          <div class="bg-slate-50 p-3 rounded-lg border text-right min-w-[200px]">
-            <label class="block font-bold text-slate-500 uppercase">Fecha y Hora Actual</label>
+          <div class="bg-slate-50 p-2.5 rounded-lg border text-right">
+            <div class="text-[10px] font-bold text-slate-400 uppercase">Fecha / Hora</div>
             <input type="text" id="salud-fecha-hora" readonly class="bg-transparent font-bold text-slate-800 text-right outline-none w-full">
           </div>
         </div>
 
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-3 bg-slate-50 p-3 rounded-lg border">
+        <!-- Encabezado Ficha -->
+        <div class="grid grid-cols-2 md:grid-cols-5 gap-3 bg-slate-50 p-3 rounded-lg border">
           <div><label class="block font-bold text-slate-600">N° Emergencia</label><input type="text" class="w-full p-1.5 border rounded bg-white mt-1"></div>
           <div><label class="block font-bold text-slate-600">N° Intervención</label><input type="text" class="w-full p-1.5 border rounded bg-white mt-1"></div>
+          <div><label class="block font-bold text-slate-600">Ambulancia N°</label><input type="text" class="w-full p-1.5 border rounded bg-white mt-1"></div>
           <div>
             <label class="block font-bold text-slate-600">Auxilio Tipo</label>
-            <select class="w-full p-1.5 border rounded bg-white mt-1 font-semibold">
-              <option value="1">Tipo 1</option><option value="2">Tipo 2</option><option value="3">Tipo 3</option>
-            </select>
+            <div class="flex gap-2 mt-1">
+              <label><input type="radio" name="auxilio" value="1"> 1</label>
+              <label><input type="radio" name="auxilio" value="2"> 2</label>
+              <label><input type="radio" name="auxilio" value="3"> 3</label>
+            </div>
           </div>
           <div>
             <label class="block font-bold text-slate-600">Clima</label>
-            <select class="w-full p-1.5 border rounded bg-white mt-1 font-semibold">
-              <option value="sol">Sol</option><option value="neblina">Neblina</option><option value="lluvia">Lluvia</option><option value="noche">Noche</option>
+            <select class="w-full p-1.5 border rounded bg-white mt-1">
+              <option>SOL</option><option>NEBL</option><option>LLUVI</option><option>NOCH</option>
             </select>
           </div>
         </div>
 
+        <!-- Identificación del Paciente -->
         <div class="bg-slate-50 p-3 rounded-lg border space-y-3">
-          <h2 class="font-bold text-slate-700 uppercase border-b pb-1">Identificación del Paciente</h2>
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
-            <div class="md:col-span-2"><label class="block font-bold text-slate-600">Nombre y Apellido</label><input type="text" class="w-full p-1.5 border rounded bg-white mt-1" required></div>
+          <h2 class="font-bold text-slate-700 uppercase border-b pb-1">Identificación del Paciente y Lugar</h2>
+          <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
+            <div class="md:col-span-2"><label class="block font-bold text-slate-600">Nombre y Apellido</label><input type="text" class="w-full p-1.5 border rounded bg-white mt-1"></div>
             <div>
-              <label class="block font-bold text-slate-600">Género</label>
-              <select class="w-full p-1.5 border rounded bg-white mt-1"><option value="M">Masculino</option><option value="F">Femenino</option></select>
+              <label class="block font-bold text-slate-600">Sexo</label>
+              <div class="flex gap-4 mt-2">
+                <label><input type="radio" name="sexo" value="M"> Masculino</label>
+                <label><input type="radio" name="sexo" value="F"> Femenino</label>
+              </div>
             </div>
+            <div><label class="block font-bold text-slate-600">Edad</label><input type="text" class="w-full p-1.5 border rounded bg-white mt-1"></div>
           </div>
-          <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
-            <div><label class="block font-bold text-slate-600">Edad</label><input type="number" class="w-full p-1.5 border rounded bg-white mt-1"></div>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+            <div><label class="block font-bold text-slate-600">Dirección</label><input type="text" class="w-full p-1.5 border rounded bg-white mt-1"></div>
             <div><label class="block font-bold text-slate-600">Tipo y N° Documento</label><input type="text" class="w-full p-1.5 border rounded bg-white mt-1"></div>
+            <div><label class="block font-bold text-slate-600">Lugar</label><label class="inline-flex items-center gap-1 ml-2"><input type="checkbox"> Vía Pública</label></div>
+          </div>
+          <div class="grid grid-cols-2 md:grid-cols-2 gap-3">
             <div><label class="block font-bold text-slate-600">Obra Social</label><input type="text" class="w-full p-1.5 border rounded bg-white mt-1"></div>
             <div><label class="block font-bold text-slate-600">N° Afiliación</label><input type="text" class="w-full p-1.5 border rounded bg-white mt-1"></div>
+          </div>
+        </div>
+
+        <!-- Informe Central Operativa y Diagrama Anatómico -->
+        <div class="bg-slate-50 p-3 rounded-lg border space-y-3">
+          <h2 class="font-bold text-slate-700 uppercase border-b pb-1">Informe Central Operativa y Localización del Traumatismo</h2>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="md:col-span-2 grid grid-cols-2 gap-x-2 text-[11px]">
+              <label><input type="checkbox"> A. ACCIDENTE TRÁNSITO</label>
+              <label><input type="checkbox"> I. PRESIÓN ALTA/BAJA</label>
+              <label><input type="checkbox"> B. DOLOR TORÁCICO</label>
+              <label><input type="checkbox"> J. PÉRDIDA DE CONOCIMIENTO</label>
+              <label><input type="checkbox"> C. FATIGA / CIANOSIS</label>
+              <label><input type="checkbox"> K. CEFÁLEA / MAREOS</label>
+              <label><input type="checkbox"> D. SUDOR Y PALIDEZ</label>
+              <label><input type="checkbox"> L. CONVULSIONES</label>
+              <label><input type="checkbox"> E. PALPITACIONES</label>
+              <label><input type="checkbox"> M. DIFICULTAD PALABRA</label>
+              <label><input type="checkbox"> F. DOLOR ABDOMINAL</label>
+              <label><input type="checkbox"> N. TEMBLOR</label>
+              <label><input type="checkbox"> G. NÁUSEAS / VÓMITOS</label>
+              <label><input type="checkbox"> O. SÍNDROME PSIQUIÁTRICO</label>
+              <label><input type="checkbox"> H. HEMORRAGIAS</label>
+              <label><input type="checkbox"> P. HERIDA CORTOPENETRANTE</label>
+              <label><input type="checkbox"> Q. EMBARAZO / TRABAJO PARTO</label>
+              <label><input type="checkbox"> R. FIEBRE</label>
+              <label><input type="checkbox"> S. REACCIÓN ALÉRGICA</label>
+              <label><input type="checkbox"> T. INTOXICADO</label>
+              <label><input type="checkbox"> U. ELECTROCUTADO</label>
+              <label><input type="checkbox"> V. QUEMADURA</label>
+            </div>
+            <div class="text-center">
+              <label class="block font-bold text-slate-600 mb-1">Marque el Sitio del Traumatismo</label>
+              <div id="body-map" class="body-canvas-container" onclick="window.addDamagePoint(event)"></div>
+              <button type="button" onclick="window.clearDamagePoints()" class="text-[10px] text-red-600 underline mt-1">Limpiar Marcas</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Datos del Trauma -->
+        <div class="bg-slate-50 p-3 rounded-lg border space-y-3">
+          <h2 class="font-bold text-slate-700 uppercase border-b pb-1">Datos del Trauma</h2>
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+            <div>
+              <label class="block font-bold text-slate-600">Vehicular</label>
+              <div class="space-y-1 mt-1">
+                <label class="block"><input type="checkbox"> AUTO</label>
+                <label class="block"><input type="checkbox"> BICICLETA</label>
+                <label class="block"><input type="checkbox"> CAMIÓN</label>
+                <label class="block"><input type="checkbox"> COLECTIVO</label>
+                <label class="block"><input type="checkbox"> MOTO</label>
+              </div>
+            </div>
+            <div>
+              <label class="block font-bold text-slate-600">Situación</label>
+              <div class="space-y-1 mt-1">
+                <label class="block"><input type="checkbox"> PEATÓN</label>
+                <label class="block"><input type="checkbox"> ACOMPAÑANTE</label>
+                <label class="block"><input type="checkbox"> TRASERO (D)</label>
+                <label class="block"><input type="checkbox"> TRASERO (I)</label>
+                <label class="block"><input type="checkbox"> CONDUCTOR</label>
+              </div>
+            </div>
+            <div>
+              <label class="block font-bold text-slate-600">Impacto / Condición</label>
+              <div class="space-y-1 mt-1">
+                <label class="block"><input type="checkbox"> FRONTAL</label>
+                <label class="block"><input type="checkbox"> LATERAL (D/I)</label>
+                <label class="block"><input type="checkbox"> VUELCO</label>
+                <label class="block"><input type="checkbox"> VÍCTIMA EXPULSADA</label>
+              </div>
+            </div>
+            <div>
+              <label class="block font-bold text-slate-600">Seguridad / Eventos</label>
+              <div class="space-y-1 mt-1">
+                <label class="block"><input type="checkbox"> CINTURÓN</label>
+                <label class="block"><input type="checkbox"> CASCO</label>
+                <label class="block"><input type="checkbox"> AIRBAG</label>
+                <label class="block"><input type="checkbox"> ARMA DE FUEGO / BLANCA</label>
+                <label class="block"><input type="checkbox"> QUEMADURA TÉRMINA/ELÉCTRICA</label>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Antecedentes / Examen Físico -->
+        <div class="bg-slate-50 p-3 rounded-lg border space-y-3">
+          <h2 class="font-bold text-slate-700 uppercase border-b pb-1">Examen Físico / Signos Vitales</h2>
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+            <div><label class="block font-bold text-slate-600">PULSO</label><input type="text" placeholder="bpm" class="w-full p-1.5 border rounded bg-white mt-1"></div>
+            <div><label class="block font-bold text-slate-600">T.A.</label><input type="text" placeholder="mmHg" class="w-full p-1.5 border rounded bg-white mt-1"></div>
+            <div><label class="block font-bold text-slate-600">GCS (Glasgow)</label><input type="text" placeholder="/15" class="w-full p-1.5 border rounded bg-white mt-1"></div>
+            <div><label class="block font-bold text-slate-600">PUPILAS</label><input type="text" placeholder="Isocóricas / Mióticas..." class="w-full p-1.5 border rounded bg-white mt-1"></div>
+          </div>
+        </div>
+
+        <!-- Clasificación del Diagnóstico Presuntivo -->
+        <div class="bg-slate-50 p-3 rounded-lg border space-y-3">
+          <h2 class="font-bold text-slate-700 uppercase border-b pb-1">Clasificación del Diagnóstico Presuntivo</h2>
+          <div class="grid grid-cols-2 md:grid-cols-3 gap-x-2 gap-y-1 text-[10px] max-h-48 overflow-y-auto p-2 border rounded bg-white">
+            <label><input type="checkbox"> 1. CARDIOPATÍA ISQUÉMICA</label>
+            <label><input type="checkbox"> 2. ARRITMIA</label>
+            <label><input type="checkbox"> 3. INSUFICIENCIA CARDÍACA</label>
+            <label><input type="checkbox"> 4. HIPERTENSIÓN ARTERIAL</label>
+            <label><input type="checkbox"> 5. HIPOTENSIÓN ARTERIAL</label>
+            <label><input type="checkbox"> 6. VARICORRAGIA</label>
+            <label><input type="checkbox"> 7. SÍNDROME GÁSTRICO/ÚLCERA</label>
+            <label><input type="checkbox"> 8. CÓLICO BILIAR</label>
+            <label><input type="checkbox"> 9. CÓLICO INTESTINAL</label>
+            <label><input type="checkbox"> 10. ABDOMEN AGUDO</label>
+            <label><input type="checkbox"> 14. TRAUMATISMO MÚLTIPLE</label>
+            <label><input type="checkbox"> 15. AMPUTACIÓN</label>
+            <label><input type="checkbox"> 16. HERIDA CORTANTE</label>
+            <label><input type="checkbox"> 19. ASMA / BRONCOESPASMO</label>
+            <label><input type="checkbox"> 21. EDEMA AGUDO DE PULMÓN</label>
+            <label><input type="checkbox"> 23. NEUMONÍA</label>
+            <label><input type="checkbox"> 34. ACV</label>
+            <label><input type="checkbox"> 36. CONVULSIONES</label>
+            <label><input type="checkbox"> 38. COMA</label>
+            <label><input type="checkbox"> 43. ALERGIAS</label>
+            <label><input type="checkbox"> 46. ÓBITO</label>
+            <label><input type="checkbox"> 48. HERIDA ARMA BLANCA/FUEGO</label>
+            <label><input type="checkbox"> 49. ÓBITO EN MÓVIL</label>
+            <label><input type="checkbox"> 50. ÓBITO EN DOMICILIO</label>
+          </div>
+          <div>
+            <label class="block font-bold text-slate-600">Destino</label>
+            <div class="flex flex-wrap gap-3 mt-1">
+              <label><input type="radio" name="destino" value="domicilio"> QUEDA EN DOMICILIO</label>
+              <label><input type="radio" name="destino" value="traslado"> TRASLADO</label>
+              <label><input type="radio" name="destino" value="no_se_encuentra"> NO SE ENCUENTRA EN EL LUGAR</label>
+              <label><input type="radio" name="destino" value="rehusado"> SE NIEGA A SER TRASLADADO</label>
+            </div>
+          </div>
+          <div>
+            <label class="block font-bold text-slate-600">Hospital / Sanatorio Destino</label>
+            <input type="text" class="w-full p-1.5 border rounded bg-white mt-1">
+          </div>
+          <div>
+            <label class="block font-bold text-slate-600">Observaciones e Intervención Policial / Comisaría / Móvil</label>
+            <textarea rows="2" class="w-full p-1.5 border rounded bg-white mt-1"></textarea>
           </div>
         </div>
 
@@ -202,18 +364,18 @@
           <h2 class="font-bold text-slate-700 uppercase border-b pb-1">Firmas</h2>
           <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
             <div>
-              <label class="block font-bold text-slate-600 mb-1">Paramédico / Interviniente</label>
-              <canvas id="canvas-paramedico" width="220" height="90" class="border rounded bg-white mx-auto"></canvas>
+              <label class="block font-bold text-slate-600 mb-1">Firma y Aclaración Paramedico</label>
+              <canvas id="canvas-paramedico" width="220" height="80" class="border rounded bg-white mx-auto"></canvas>
               <button type="button" onclick="window.clearCanvas('canvas-paramedico')" class="text-[10px] text-red-600 underline mt-1">Limpiar</button>
             </div>
             <div>
-              <label class="block font-bold text-slate-600 mb-1">Médico Receptante</label>
-              <canvas id="canvas-medico-rec" width="220" height="90" class="border rounded bg-white mx-auto"></canvas>
+              <label class="block font-bold text-slate-600 mb-1">Firma Médico Receptor</label>
+              <canvas id="canvas-medico-rec" width="220" height="80" class="border rounded bg-white mx-auto"></canvas>
               <button type="button" onclick="window.clearCanvas('canvas-medico-rec')" class="text-[10px] text-red-600 underline mt-1">Limpiar</button>
             </div>
             <div>
-              <label class="block font-bold text-slate-600 mb-1">Familiar / Responsable</label>
-              <canvas id="canvas-familiar-rec" width="220" height="90" class="border rounded bg-white mx-auto"></canvas>
+              <label class="block font-bold text-slate-600 mb-1">Firma Familiar / Responsable</label>
+              <canvas id="canvas-familiar-rec" width="220" height="80" class="border rounded bg-white mx-auto"></canvas>
               <button type="button" onclick="window.clearCanvas('canvas-familiar-rec')" class="text-[10px] text-red-600 underline mt-1">Limpiar</button>
             </div>
           </div>
@@ -221,13 +383,13 @@
       </form>
     </div>
 
-    <!-- ==================== VISTA 2: CHOFER - FICHA DE RELEVO ==================== -->
+    <!-- ==================== VISTA 2: CHOFER - FICHA DE RELEVO DE MÓVILES ==================== -->
     <div id="view-chofer-relevo" class="hidden">
       <div class="flex justify-end gap-2 mb-3">
-        <button onclick="window.downloadPDF('form-ficha-relevo', 'Ficha_Relevo_Movil.pdf')" class="bg-slate-800 hover:bg-slate-900 text-white font-bold text-xs px-4 py-2 rounded-lg shadow flex items-center gap-2">
+        <button onclick="window.downloadPDF('form-ficha-relevo', 'Ficha_Relevo_Moviles.pdf')" class="bg-slate-800 hover:bg-slate-900 text-white font-bold text-xs px-4 py-2 rounded-lg shadow flex items-center gap-2">
           <i data-lucide="download" class="w-4 h-4"></i> Descargar PDF
         </button>
-        <button onclick="window.sendPDFByEmail('form-ficha-relevo', 'Ficha_Relevo_Movil.pdf', 'Ficha Relevo de Moviles - UTE Eldorado')" class="bg-red-600 hover:bg-red-700 text-white font-bold text-xs px-4 py-2 rounded-lg shadow flex items-center gap-2">
+        <button onclick="window.sendPDFByEmail('form-ficha-relevo', 'Ficha_Relevo_Moviles.pdf', 'Ficha Relevo de Moviles - UTE Eldorado')" class="bg-red-600 hover:bg-red-700 text-white font-bold text-xs px-4 py-2 rounded-lg shadow flex items-center gap-2">
           <i data-lucide="mail" class="w-4 h-4"></i> Enviar por Correo (PDF)
         </button>
       </div>
@@ -235,30 +397,98 @@
       <form id="form-ficha-relevo" class="bg-white p-6 rounded-xl shadow-lg border border-slate-200 space-y-6 text-xs">
         <div class="border-b pb-3 flex justify-between items-center">
           <div>
-            <h1 class="text-lg font-black text-slate-900 uppercase">Declaración Jurada - Ficha de Relevo de Móviles</h1>
-            <p class="text-xs text-slate-500 font-semibold">UTE UNIDAD DE TRASLADO ELDORADO</p>
+            <h1 class="text-base font-black text-slate-900 uppercase">Declaración Jurada - Ficha de Relevo de Móviles</h1>
+            <p class="text-xs text-slate-500 font-semibold">Ministerio de Salud Pública - Misiones</p>
           </div>
           <div class="bg-slate-50 p-2 rounded border text-right">
             <input type="text" id="relevo-fecha-hora" readonly class="bg-transparent font-bold text-slate-800 text-right outline-none">
           </div>
         </div>
 
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-3 bg-slate-50 p-3 rounded-lg border">
-          <div><label class="block font-bold text-slate-600">Marca / Móvil N°</label><input type="text" class="w-full p-1.5 border rounded bg-white mt-1"></div>
-          <div><label class="block font-bold text-slate-600">Dominio / Patente</label><input type="text" class="w-full p-1.5 border rounded bg-white mt-1"></div>
-          <div><label class="block font-bold text-slate-600">Km. Actual</label><input type="number" class="w-full p-1.5 border rounded bg-white mt-1"></div>
-          <div><label class="block font-bold text-slate-600">Turno</label><input type="text" class="w-full p-1.5 border rounded bg-white mt-1"></div>
+        <!-- Choferes y Datos Vehículo -->
+        <div class="bg-slate-50 p-3 rounded-lg border space-y-3">
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+            <div><label class="block font-bold text-slate-600">Marca de Móvil</label><input type="text" class="w-full p-1.5 border rounded bg-white mt-1"></div>
+            <div><label class="block font-bold text-slate-600">N° de Móvil</label><input type="text" class="w-full p-1.5 border rounded bg-white mt-1"></div>
+            <div><label class="block font-bold text-slate-600">Dominio / Patente</label><input type="text" class="w-full p-1.5 border rounded bg-white mt-1"></div>
+            <div><label class="block font-bold text-slate-600">Km. Actual</label><input type="number" class="w-full p-1.5 border rounded bg-white mt-1"></div>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+            <div><label class="block font-bold text-slate-600">Chofer Ant.</label><input type="text" class="w-full p-1.5 border rounded bg-white mt-1"></div>
+            <div><label class="block font-bold text-slate-600">Chofer Ent.</label><input type="text" class="w-full p-1.5 border rounded bg-white mt-1"></div>
+            <div><label class="block font-bold text-slate-600">Chofer Post.</label><input type="text" class="w-full p-1.5 border rounded bg-white mt-1"></div>
+          </div>
+          <div class="grid grid-cols-3 gap-3">
+            <div><label class="block font-bold text-slate-600">Licencia N°</label><input type="text" class="w-full p-1.5 border rounded bg-white mt-1"></div>
+            <div><label class="block font-bold text-slate-600">Cat. Licencia</label><input type="text" class="w-full p-1.5 border rounded bg-white mt-1"></div>
+            <div><label class="block font-bold text-slate-600">Vencim. Licencia</label><input type="date" class="w-full p-1.5 border rounded bg-white mt-1"></div>
+          </div>
         </div>
 
+        <!-- Controles y Funcionamiento -->
+        <div class="bg-slate-50 p-3 rounded-lg border space-y-3">
+          <h2 class="font-bold text-slate-700 uppercase border-b pb-1">Controles de Estado y Funcionalidad</h2>
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
+            <div class="p-2 bg-white border rounded">
+              <span class="font-bold block mb-1">Lavado Exterior</span>
+              <label class="mr-2"><input type="radio" name="lav_ext" value="SI"> SI</label>
+              <label><input type="radio" name="lav_ext" value="NO"> NO</label>
+            </div>
+            <div class="p-2 bg-white border rounded">
+              <span class="font-bold block mb-1">Lavado Interior</span>
+              <label class="mr-2"><input type="radio" name="lav_int" value="SI"> SI</label>
+              <label><input type="radio" name="lav_int" value="NO"> NO</label>
+            </div>
+            <div class="p-2 bg-white border rounded">
+              <span class="font-bold block mb-1">Lavado Motor</span>
+              <label class="mr-2"><input type="radio" name="lav_mot" value="SI"> SI</label>
+              <label><input type="radio" name="lav_mot" value="NO"> NO</label>
+            </div>
+            <div class="p-2 bg-white border rounded">
+              <span class="font-bold block mb-1">Lavado Chasis</span>
+              <label class="mr-2"><input type="radio" name="lav_cha" value="SI"> SI</label>
+              <label><input type="radio" name="lav_cha" value="NO"> NO</label>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 md:grid-cols-3 gap-2">
+            <label class="p-1.5 border rounded bg-white flex justify-between">Luces Posición <input type="checkbox"></label>
+            <label class="p-1.5 border rounded bg-white flex justify-between">Luces Direccionales <input type="checkbox"></label>
+            <label class="p-1.5 border rounded bg-white flex justify-between">Luces Altas / Bajas <input type="checkbox"></label>
+            <label class="p-1.5 border rounded bg-white flex justify-between">Sirena / Balizas <input type="checkbox"></label>
+            <label class="p-1.5 border rounded bg-white flex justify-between">Limpiaparabrisas <input type="checkbox"></label>
+            <label class="p-1.5 border rounded bg-white flex justify-between">Calefactor y A/C <input type="checkbox"></label>
+            <label class="p-1.5 border rounded bg-white flex justify-between">Matafuegos Vencimiento <input type="checkbox"></label>
+            <label class="p-1.5 border rounded bg-white flex justify-between">Rueda de Auxilio / Gato <input type="checkbox"></label>
+            <label class="p-1.5 border rounded bg-white flex justify-between">Equipo Comunicación <input type="checkbox"></label>
+          </div>
+
+          <div>
+            <label class="block font-bold text-slate-600">Nivel de Combustible</label>
+            <select class="w-full p-2 border rounded bg-white mt-1 font-bold">
+              <option>1/4 Tanque</option>
+              <option>1/2 Tanque</option>
+              <option>3/4 Tanque</option>
+              <option selected>Tanque Lleno</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="block font-bold text-slate-600">DECLARO BAJO JURAMENTO / Algo para declarar:</label>
+            <textarea rows="2" class="w-full p-2 border rounded bg-white mt-1" placeholder="Rayones, roturas, faltantes..."></textarea>
+          </div>
+        </div>
+
+        <!-- Firmas -->
         <div class="bg-slate-50 p-3 rounded-lg border space-y-3">
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-center">
             <div>
-              <label class="block font-bold text-slate-600 mb-1">Firma Chofer Entrante</label>
+              <label class="block font-bold text-slate-600 mb-1">Chofer Entrante (Nombre, Apellido, DNI)</label>
               <canvas id="canvas-chofer-entrante" width="220" height="80" class="border rounded bg-white mx-auto"></canvas>
               <button type="button" onclick="window.clearCanvas('canvas-chofer-entrante')" class="text-[10px] text-red-600 underline mt-1">Limpiar</button>
             </div>
             <div>
-              <label class="block font-bold text-slate-600 mb-1">Firma Chofer Saliente</label>
+              <label class="block font-bold text-slate-600 mb-1">Chofer Saliente (Nombre, Apellido, DNI)</label>
               <canvas id="canvas-chofer-saliente" width="220" height="80" class="border rounded bg-white mx-auto"></canvas>
               <button type="button" onclick="window.clearCanvas('canvas-chofer-saliente')" class="text-[10px] text-red-600 underline mt-1">Limpiar</button>
             </div>
@@ -267,7 +497,7 @@
       </form>
     </div>
 
-    <!-- ==================== VISTA 3: CHOFER - MOVIMIENTO ==================== -->
+    <!-- ==================== VISTA 3: CHOFER - PLANILLA MOVIMIENTO DE MÓVIL ==================== -->
     <div id="view-chofer-movimiento" class="hidden">
       <div class="flex justify-end gap-2 mb-3">
         <button onclick="window.downloadPDF('form-movimiento-movil', 'Planilla_Movimiento_Movil.pdf')" class="bg-slate-800 hover:bg-slate-900 text-white font-bold text-xs px-4 py-2 rounded-lg shadow flex items-center gap-2">
@@ -281,14 +511,82 @@
       <form id="form-movimiento-movil" class="bg-white p-6 rounded-xl shadow-lg border border-slate-200 space-y-6 text-xs">
         <div class="border-b pb-3 flex justify-between items-center">
           <div>
-            <h1 class="text-lg font-black text-slate-900 uppercase">Planilla de Movimiento de Móvil</h1>
-            <p class="text-xs text-slate-500 font-semibold">UTE UNIDAD DE TRASLADO ELDORADO</p>
+            <h1 class="text-base font-black text-slate-900 uppercase">Planilla de Movimiento de Móvil</h1>
+            <p class="text-xs text-slate-500 font-semibold">Gobierno de Misiones - Ministerio de Salud Pública - UNIDAD DE TRASLADOS</p>
           </div>
           <div class="bg-slate-50 p-2 rounded border text-right">
             <input type="text" id="movimiento-fecha-hora" readonly class="bg-transparent font-bold text-slate-800 text-right outline-none">
           </div>
         </div>
 
+        <!-- Tripulación -->
+        <div class="bg-slate-50 p-3 rounded-lg border space-y-2">
+          <h2 class="font-bold text-slate-700 uppercase border-b pb-1">Tripulación</h2>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+            <div><label class="block font-bold text-slate-600">1. Médico</label><input type="text" class="w-full p-1.5 border rounded bg-white mt-1"></div>
+            <div><label class="block font-bold text-slate-600">2. Enfermero</label><input type="text" class="w-full p-1.5 border rounded bg-white mt-1"></div>
+            <div><label class="block font-bold text-slate-600">3. Chofer</label><input type="text" class="w-full p-1.5 border rounded bg-white mt-1"></div>
+          </div>
+        </div>
+
+        <!-- Tabla Movimientos -->
+        <div class="bg-slate-50 p-3 rounded-lg border space-y-3 overflow-x-auto">
+          <h2 class="font-bold text-slate-700 uppercase border-b pb-1">Registro de Salidas y Regresos</h2>
+          <table class="w-full text-left border-collapse min-w-[700px]">
+            <thead>
+              <tr class="bg-slate-200 text-slate-700 font-bold">
+                <th class="p-1 border" colspan="3">Salida / Destino</th>
+                <th class="p-1 border" colspan="2">Llegada a Destino</th>
+                <th class="p-1 border">N° Serv.</th>
+                <th class="p-1 border" colspan="2">Regreso a Base</th>
+              </tr>
+              <tr class="bg-slate-100 text-slate-600">
+                <th class="p-1 border">Hora</th>
+                <th class="p-1 border">Kms.</th>
+                <th class="p-1 border">Cód. / Destino</th>
+                <th class="p-1 border">Hora</th>
+                <th class="p-1 border">Kms.</th>
+                <th class="p-1 border">N°</th>
+                <th class="p-1 border">Hora</th>
+                <th class="p-1 border">Kms.</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="border p-1"><input type="time" class="w-full p-1 bg-white border rounded"></td>
+                <td class="border p-1"><input type="number" class="w-full p-1 bg-white border rounded"></td>
+                <td class="border p-1"><input type="text" class="w-full p-1 bg-white border rounded"></td>
+                <td class="border p-1"><input type="time" class="w-full p-1 bg-white border rounded"></td>
+                <td class="border p-1"><input type="number" class="w-full p-1 bg-white border rounded"></td>
+                <td class="border p-1"><input type="text" class="w-full p-1 bg-white border rounded"></td>
+                <td class="border p-1"><input type="time" class="w-full p-1 bg-white border rounded"></td>
+                <td class="border p-1"><input type="number" class="w-full p-1 bg-white border rounded"></td>
+              </tr>
+              <tr>
+                <td class="border p-1"><input type="time" class="w-full p-1 bg-white border rounded"></td>
+                <td class="border p-1"><input type="number" class="w-full p-1 bg-white border rounded"></td>
+                <td class="border p-1"><input type="text" class="w-full p-1 bg-white border rounded"></td>
+                <td class="border p-1"><input type="time" class="w-full p-1 bg-white border rounded"></td>
+                <td class="border p-1"><input type="number" class="w-full p-1 bg-white border rounded"></td>
+                <td class="border p-1"><input type="text" class="w-full p-1 bg-white border rounded"></td>
+                <td class="border p-1"><input type="time" class="w-full p-1 bg-white border rounded"></td>
+                <td class="border p-1"><input type="number" class="w-full p-1 bg-white border rounded"></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Carga de Combustible -->
+        <div class="bg-slate-50 p-3 rounded-lg border space-y-2">
+          <h2 class="font-bold text-slate-700 uppercase border-b pb-1">Carga de Combustibles</h2>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+            <div class="flex items-center gap-2"><label class="font-bold">Fecha:</label><input type="date" class="border p-1 rounded bg-white"><label class="font-bold">Litros:</label><input type="number" class="border p-1 rounded bg-white w-20"></div>
+            <div class="flex items-center gap-2"><label class="font-bold">Fecha:</label><input type="date" class="border p-1 rounded bg-white"><label class="font-bold">Litros:</label><input type="number" class="border p-1 rounded bg-white w-20"></div>
+            <div class="flex items-center gap-2"><label class="font-bold">Fecha:</label><input type="date" class="border p-1 rounded bg-white"><label class="font-bold">Litros:</label><input type="number" class="border p-1 rounded bg-white w-20"></div>
+          </div>
+        </div>
+
+        <!-- Firma -->
         <div class="bg-slate-50 p-3 rounded-lg border text-center space-y-2">
           <label class="block font-bold text-slate-600">Firma del Chofer</label>
           <canvas id="canvas-chofer-mov" width="220" height="80" class="border rounded bg-white mx-auto"></canvas>
@@ -299,14 +597,12 @@
 
   </div>
 
-  <!-- FIREBASE SDK V10 Y LÓGICA DE LA APLICACIÓN -->
+  <!-- FIREBASE Y LÓGICA GENERAL -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
-    import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-analytics.js";
     import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, OAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-auth.js";
     import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
 
-    // Configuración oficial de tu proyecto Firebase
     const firebaseConfig = {
       apiKey: "AIzaSyByIDJthB3pJtzW5ydWyyqpQ-9b39vJ_V8",
       authDomain: "unidad-de-traslado-eldorado.firebaseapp.com",
@@ -317,59 +613,59 @@
       measurementId: "G-H1B7EKJXJ3"
     };
 
-    // Inicializar Firebase
     const app = initializeApp(firebaseConfig);
-    const analytics = getAnalytics(app);
     const auth = getAuth(app);
     const db = getFirestore(app);
 
-    // Proveedores de Redes Sociales
     const googleProvider = new GoogleAuthProvider();
     const appleProvider = new OAuthProvider('apple.com');
 
-    // Inicializar Iconos Lucide
-    if (window.lucide) {
-      window.lucide.createIcons();
-    }
+    if (window.lucide) window.lucide.createIcons();
 
-    // Escuchar el estado de la sesión
+    // Gestor de sesión corregido (Evita el bucle en el inicio de sesión)
     onAuthStateChanged(auth, async (user) => {
       if (user) {
-        const userDocRef = doc(db, "users", user.uid);
-        let userDoc = await getDoc(userDocRef);
+        let role = 'salud';
+        let name = user.displayName || user.email;
 
-        // Si ingresa por Google/Apple y no existe documento, le solicita su rol
-        if (!userDoc.exists()) {
-          const selectedRole = prompt("¡Bienvenido/a a UTE ELDORADO!\n\nPor favor escriba su rol:\n- Escriba 'salud' para Personal de Salud / Técnico / Médico\n- Escriba 'chofer' para Chofer de Unidad", "salud");
-          const role = (selectedRole && selectedRole.toLowerCase() === 'chofer') ? 'chofer' : 'salud';
+        try {
+          const userDocRef = doc(db, "users", user.uid);
+          const userDoc = await getDoc(userDocRef);
 
-          await setDoc(userDocRef, {
-            name: user.displayName || user.email.split('@')[0],
-            email: user.email,
-            role: role,
-            matricula: '',
-            createdAt: new Date()
-          });
-
-          userDoc = await getDoc(userDocRef);
+          if (userDoc.exists()) {
+            const data = userDoc.data();
+            role = data.role || 'salud';
+            name = data.name || name;
+          } else {
+            const selectedRole = prompt("¡Bienvenido/a a UTE ELDORADO!\n\nSeleccione su función:\n- Escriba 'salud' para Personal de Salud\n- Escriba 'chofer' para Chofer", "salud");
+            role = (selectedRole && selectedRole.toLowerCase() === 'chofer') ? 'chofer' : 'salud';
+            await setDoc(userDocRef, { name, email: user.email, role, createdAt: new Date() });
+          }
+        } catch (err) {
+          console.warn("Aviso Firestore: ", err);
         }
 
-        const userData = userDoc.data();
         document.getElementById('auth-container').classList.add('hidden');
         document.getElementById('app-container').classList.remove('hidden');
-        document.getElementById('user-display-name').innerText = userData.name;
-        document.getElementById('user-display-role').innerText = userData.role === 'chofer' ? 'Chofer de Unidad' : 'Personal de Salud';
+        document.getElementById('user-display-name').innerText = name;
+        document.getElementById('user-display-role').innerText = role === 'chofer' ? 'Chofer de Unidad' : 'Personal de Salud';
 
         updateTimestamps();
 
-        if (userData.role === 'chofer') {
+        if (role === 'chofer') {
           document.getElementById('nav-chofer').classList.remove('hidden');
+          document.getElementById('view-salud').classList.add('hidden');
           window.switchChoferView('relevo');
         } else {
+          document.getElementById('nav-chofer').classList.add('hidden');
+          document.getElementById('view-chofer-relevo').classList.add('hidden');
+          document.getElementById('view-chofer-movimiento').classList.add('hidden');
           document.getElementById('view-salud').classList.remove('hidden');
-          initCanvas('canvas-paramedico');
-          initCanvas('canvas-medico-rec');
-          initCanvas('canvas-familiar-rec');
+          setTimeout(() => {
+            initCanvas('canvas-paramedico');
+            initCanvas('canvas-medico-rec');
+            initCanvas('canvas-familiar-rec');
+          }, 100);
         }
       } else {
         document.getElementById('auth-container').classList.remove('hidden');
@@ -377,115 +673,92 @@
       }
     });
 
-    // Iniciar Sesión con Google
     window.loginWithGoogle = async function() {
-      try {
-        await signInWithPopup(auth, googleProvider);
-      } catch (error) {
-        alert("Error al ingresar con Google: " + error.message);
-      }
+      try { await signInWithPopup(auth, googleProvider); } 
+      catch (error) { alert("Error con Google: " + error.message); }
     };
 
-    // Iniciar Sesión con Apple
     window.loginWithApple = async function() {
-      try {
-        await signInWithPopup(auth, appleProvider);
-      } catch (error) {
-        alert("Error al ingresar con Apple: " + error.message);
-      }
+      try { await signInWithPopup(auth, appleProvider); } 
+      catch (error) { alert("Error con Apple: " + error.message); }
     };
 
-    // Registro con Correo
-    window.handleRegister = async function(e) {
-      e.preventDefault();
-      const name = document.getElementById('reg-name').value;
-      const email = document.getElementById('reg-email').value;
-      const role = document.getElementById('reg-role').value;
-      const matricula = document.getElementById('reg-matricula').value;
-      const pass = document.getElementById('reg-pass').value;
-
-      try {
-        const userCredential = await createUserWithEmailAndPassword(auth, email, pass);
-        const user = userCredential.user;
-
-        await setDoc(doc(db, "users", user.uid), {
-          name: name,
-          email: email,
-          role: role,
-          matricula: matricula || '',
-          createdAt: new Date()
-        });
-
-        alert("¡Cuenta registrada con éxito en UTE ELDORADO!");
-      } catch (error) {
-        alert("Error al registrarse: " + error.message);
-      }
-    };
-
-    // Login con Correo
     window.handleLogin = async function(e) {
       e.preventDefault();
-      const email = document.getElementById('login-email').value;
-      const pass = document.getElementById('login-pass').value;
-
+      const btn = document.getElementById('btn-login-submit');
+      btn.innerText = "Ingresando...";
       try {
-        await signInWithEmailAndPassword(auth, email, pass);
+        await signInWithEmailAndPassword(auth, document.getElementById('login-email').value, document.getElementById('login-pass').value);
       } catch (error) {
         alert("Error de acceso: " + error.message);
+      } finally {
+        btn.innerText = "Ingresar al Sistema";
       }
     };
 
-    // Cerrar Sesión
-    window.logout = function() {
-      signOut(auth).then(() => {
-        location.reload();
-      });
+    window.handleRegister = async function(e) {
+      e.preventDefault();
+      const btn = document.getElementById('btn-register-submit');
+      btn.innerText = "Registrando...";
+      try {
+        const name = document.getElementById('reg-name').value;
+        const email = document.getElementById('reg-email').value;
+        const role = document.getElementById('reg-role').value;
+        const matricula = document.getElementById('reg-matricula').value;
+        const pass = document.getElementById('reg-pass').value;
+
+        const res = await createUserWithEmailAndPassword(auth, email, pass);
+        await setDoc(doc(db, "users", res.user.uid), { name, email, role, matricula, createdAt: new Date() });
+      } catch (error) {
+        alert("Error en el registro: " + error.message);
+      } finally {
+        btn.innerText = "Crear Cuenta";
+      }
     };
 
+    window.logout = function() { signOut(auth); };
+
     function updateTimestamps() {
-      const now = new Date();
-      const str = now.toLocaleString('es-AR', { dateStyle: 'short', timeStyle: 'short' });
-      if(document.getElementById('salud-fecha-hora')) document.getElementById('salud-fecha-hora').value = str;
-      if(document.getElementById('relevo-fecha-hora')) document.getElementById('relevo-fecha-hora').value = str;
-      if(document.getElementById('movimiento-fecha-hora')) document.getElementById('movimiento-fecha-hora').value = str;
+      const str = new Date().toLocaleString('es-AR', { dateStyle: 'short', timeStyle: 'short' });
+      ['salud-fecha-hora', 'relevo-fecha-hora', 'movimiento-fecha-hora'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.value = str;
+      });
     }
 
     window.showAuthTab = function(tab) {
-      if (tab === 'login') {
-        document.getElementById('login-form').classList.remove('hidden');
-        document.getElementById('register-form').classList.add('hidden');
-        document.getElementById('tab-login').className = "w-1/2 py-2 text-red-600 border-b-2 border-red-600";
-        document.getElementById('tab-register').className = "w-1/2 py-2 text-slate-400 border-b-2 border-transparent";
-      } else {
-        document.getElementById('login-form').classList.add('hidden');
-        document.getElementById('register-form').classList.remove('hidden');
-        document.getElementById('tab-register').className = "w-1/2 py-2 text-red-600 border-b-2 border-red-600";
-        document.getElementById('tab-login').className = "w-1/2 py-2 text-slate-400 border-b-2 border-transparent";
-      }
+      document.getElementById('login-form').classList.toggle('hidden', tab !== 'login');
+      document.getElementById('register-form').classList.toggle('hidden', tab === 'login');
+      document.getElementById('tab-login').className = tab === 'login' ? "w-1/2 py-2 text-red-600 border-b-2 border-red-600" : "w-1/2 py-2 text-slate-400 border-b-2 border-transparent";
+      document.getElementById('tab-register').className = tab !== 'login' ? "w-1/2 py-2 text-red-600 border-b-2 border-red-600" : "w-1/2 py-2 text-slate-400 border-b-2 border-transparent";
     };
 
     window.switchChoferView = function(view) {
-      document.getElementById('view-chofer-relevo').classList.add('hidden');
-      document.getElementById('view-chofer-movimiento').classList.add('hidden');
+      document.getElementById('view-chofer-relevo').classList.toggle('hidden', view !== 'relevo');
+      document.getElementById('view-chofer-movimiento').classList.toggle('hidden', view === 'relevo');
 
-      if (view === 'relevo') {
-        document.getElementById('view-chofer-relevo').classList.remove('hidden');
-        initCanvas('canvas-chofer-entrante');
-        initCanvas('canvas-chofer-saliente');
-      } else {
-        document.getElementById('view-chofer-movimiento').classList.remove('hidden');
-        initCanvas('canvas-chofer-mov');
-      }
+      document.getElementById('btn-nav-relevo').className = view === 'relevo' ? "px-4 py-2 text-sm font-bold bg-red-600 text-white rounded-lg shadow" : "px-4 py-2 text-sm font-bold bg-slate-200 text-slate-700 rounded-lg";
+      document.getElementById('btn-nav-movimiento').className = view !== 'relevo' ? "px-4 py-2 text-sm font-bold bg-red-600 text-white rounded-lg shadow" : "px-4 py-2 text-sm font-bold bg-slate-200 text-slate-700 rounded-lg";
+
+      setTimeout(() => {
+        if (view === 'relevo') {
+          initCanvas('canvas-chofer-entrante');
+          initCanvas('canvas-chofer-saliente');
+        } else {
+          initCanvas('canvas-chofer-mov');
+        }
+      }, 100);
     };
 
+    // Canvas
     function initCanvas(id) {
       const canvas = document.getElementById(id);
       if (!canvas) return;
       const ctx = canvas.getContext('2d');
       let drawing = false;
 
-      function startDrawing(e) { drawing = true; draw(e); }
-      function stopDrawing() { drawing = false; ctx.beginPath(); }
+      function start(e) { drawing = true; draw(e); }
+      function stop() { drawing = false; ctx.beginPath(); }
       function draw(e) {
         if (!drawing) return;
         const rect = canvas.getBoundingClientRect();
@@ -500,38 +773,47 @@
         ctx.moveTo(clientX - rect.left, clientY - rect.top);
       }
 
-      canvas.addEventListener('mousedown', startDrawing);
-      canvas.addEventListener('mouseup', stopDrawing);
-      canvas.addEventListener('mousemove', draw);
-      canvas.addEventListener('touchstart', startDrawing);
-      canvas.addEventListener('touchend', stopDrawing);
-      canvas.addEventListener('touchmove', draw);
+      canvas.onmousedown = start; canvas.onmouseup = stop; canvas.onmousemove = draw;
+      canvas.ontouchstart = start; canvas.ontouchend = stop; canvas.ontouchmove = draw;
     }
 
     window.clearCanvas = function(id) {
       const canvas = document.getElementById(id);
-      if(canvas) {
-        const ctx = canvas.getContext('2d');
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-      }
+      if (canvas) canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
     };
 
-    // FUNCIONES DE PDF Y CORREO
+    // Marcas de Traumatismo
+    window.addDamagePoint = function(e) {
+      const container = document.getElementById('body-map');
+      const rect = container.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+
+      const dot = document.createElement('div');
+      dot.className = 'damage-dot';
+      dot.style.left = `${x}px`;
+      dot.style.top = `${y}px`;
+      container.appendChild(dot);
+    };
+
+    window.clearDamagePoints = function() {
+      const container = document.getElementById('body-map');
+      container.querySelectorAll('.damage-dot').forEach(el => el.remove());
+    };
+
+    // Exportación PDF
     window.downloadPDF = function(formId, filename) {
       const element = document.getElementById(formId);
-      html2pdf().set({ margin: 0.2, filename: filename, image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2 } }).from(element).save();
+      html2pdf().set({ margin: 0.2, filename, image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2 } }).from(element).save();
     };
 
     window.sendPDFByEmail = function(formId, filename, subjectText) {
       const element = document.getElementById(formId);
-      
-      html2pdf().set({ margin: 0.2, filename: filename, image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2 } }).from(element).save().then(() => {
-        const destinationEmail = prompt("Ingrese la dirección de correo a la que desea enviar la planilla:");
-        if (destinationEmail) {
-          const bodyText = encodeURIComponent(`Adjunto a este correo se encuentra la planilla registrada en formato PDF perteneciente a UTE UNIDAD DE TRASLADO ELDORADO.\n\nFecha de emisión: ${new Date().toLocaleString('es-AR')}`);
-          const subject = encodeURIComponent(subjectText);
-          
-          window.location.href = `mailto:${destinationEmail}?subject=${subject}&body=${bodyText}`;
+      html2pdf().set({ margin: 0.2, filename, image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2 } }).from(element).save().then(() => {
+        const email = prompt("Ingrese la dirección de correo destino:");
+        if (email) {
+          const body = encodeURIComponent(`Adjunto PDF de la planilla generada desde la app UTE ELDORADO.\nFecha: ${new Date().toLocaleString('es-AR')}`);
+          window.location.href = `mailto:${email}?subject=${encodeURIComponent(subjectText)}&body=${body}`;
         }
       });
     };
