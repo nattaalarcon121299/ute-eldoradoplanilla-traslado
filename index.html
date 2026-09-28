@@ -1,0 +1,1567 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>UNIDAD DE TRASLADO ELDORADO</title>
+  <link rel="icon" type="image/png" href="icono.ico">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  <style>
+    @media print {
+      @page {
+        size: letter portrait;
+        margin: 3mm;
+      }
+      body {
+        font-size: 9px !important;
+        line-height: 1.1 !important;
+      }
+      .p-6, .p-4, .p-5, .p-3 {
+        padding: 0.25rem !important;
+      }
+      .space-y-6 > * + *, 
+      .space-y-4 > * + *,
+      .space-y-3 > * + * {
+        margin-top: 0.25rem !important;
+      }
+      input, select, textarea {
+        padding-top: 1px !important;
+        padding-bottom: 1px !important;
+        font-size: 8.5px !important;
+      }
+    }
+    canvas { touch-action: none; }
+    .body-canvas-container {
+      position: relative;
+      width: 180px;
+      height: 220px;
+      margin: 0 auto;
+      border: 1px dashed #cbd5e1;
+      border-radius: 8px;
+      background-color: #ffffff;
+      cursor: crosshair;
+      user-select: none;
+    }
+    .body-canvas-container svg,
+    .body-canvas-container svg * {
+      pointer-events: none;
+    }
+    .damage-dot {
+      position: absolute;
+      width: 10px;
+      height: 10px;
+      background-color: #ef4444;
+      border: 2px solid #ffffff;
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+      z-index: 10;
+    }
+
+    /* Clases para Dark Mode */
+    .dark body { background-color: #0f172a !important; color: #f1f5f9 !important; }
+    .dark #auth-container, .dark #app-container .bg-white, .dark .bg-white, .dark .bg-slate-50 {
+      background-color: #1e293b !important;
+      color: #f1f5f9 !important;
+      border-color: #334155 !important;
+    }
+    .dark input, .dark select, .dark textarea {
+      background-color: #0f172a !important;
+      color: #f1f5f9 !important;
+      border-color: #475569 !important;
+    }
+    .dark input::placeholder, .dark textarea::placeholder {
+      color: #94a3b8 !important;
+    }
+    .dark .text-slate-800, .dark .text-slate-700, .dark .text-slate-600 {
+      color: #cbd5e1 !important;
+    }
+    .dark .text-slate-400 {
+      color: #94a3b8 !important;
+    }
+    .dark .border, .dark .border-slate-200, .dark .border-slate-300, .dark .border-slate-100 {
+      border-color: #334155 !important;
+    }
+    .dark .bg-slate-100, .dark .bg-slate-200 {
+      background-color: #334155 !important;
+      color: #f1f5f9 !important;
+    }
+    .dark .body-canvas-container {
+      background-color: #0f172a !important;
+      border-color: #475569 !important;
+    }
+    .dark #planillas-dropdown-menu {
+      background-color: #1e293b !important;
+      border-color: #334155 !important;
+    }
+  </style>
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body class="bg-slate-100 text-slate-800 min-h-screen font-sans" style="background-image: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)), url('logo.png'); background-size: cover; background-position: center; background-repeat: no-repeat;">
+
+<!-- ==================== LOGIN ==================== -->
+<div id="auth-container" class="max-w-md mx-auto mt-20 p-6 bg-white/95 backdrop-blur-sm rounded-xl shadow-2xl border space-y-6 relative">
+  <!-- Botón de Modo Oscuro en Login -->
+  <div class="absolute top-4 right-4">
+    <button onclick="toggleDarkMode()" type="button" class="p-2 bg-slate-200 dark:bg-slate-700 rounded-lg text-slate-700 dark:text-slate-200 transition-all hover:scale-105" title="Alternar Modo Oscuro/Claro">
+      <i data-lucide="moon" class="w-4 h-4 hidden dark:block"></i>
+      <i data-lucide="sun" class="w-4 h-4 block dark:hidden"></i>
+    </button>
+  </div>
+
+  <div class="text-center space-y-2 flex flex-col items-center">
+    <h2 class="text-xl font-bold text-center text-slate-800">UTE ELDORADO</h2>
+    <div class="flex justify-center my-1">
+      <div class="w-16 h-16 rounded-full flex items-center justify-center overflow-hidden border border-red-100 shadow-sm bg-white">
+        <img src="image_935481.jpg" alt="Logo SEPUTE" class="w-full h-full object-cover">
+      </div>
+    </div>
+    <p class="text-xs font-bold uppercase tracking-widest text-slate-400">Acceso</p>
+  </div>
+
+  <form onsubmit="window.handleLogin(event)" class="space-y-4">
+    <div>
+      <label class="block text-xs font-bold text-slate-700 mb-1">Nombre de Usuario</label>
+      <input type="text" id="login-user" required placeholder="Ej: chofer1" class="w-full p-2 border rounded text-sm bg-slate-50">
+    </div>
+    <div>
+      <label class="block text-xs font-bold text-slate-700 mb-1">Contraseña</label>
+      <input type="password" id="login-pass" required placeholder="********" class="w-full p-2 border rounded text-sm bg-slate-50">
+    </div>
+    <button type="submit" id="btn-login-submit" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2 rounded shadow transition-all text-sm">
+      Ingresar al Sistema
+    </button>
+  </form>
+</div>
+
+<!-- ==================== CONTENEDOR PRINCIPAL APP ==================== -->
+<div id="app-container" class="hidden max-w-5xl mx-auto my-6 p-4">
+  <!-- Barra Superior -->
+  <div class="flex justify-between items-center mb-6 bg-white p-4 rounded-xl shadow border border-slate-200">
+    <div class="flex items-center space-x-3">
+      <div class="p-2 bg-slate-100 rounded-lg text-slate-700">
+        <i data-lucide="user-check" class="w-6 h-6"></i>
+      </div>
+      <div>
+        <h2 id="user-display-name" class="font-bold text-slate-800 text-base">Cargando...</h2>
+        <span id="user-display-role" class="inline-block px-2 py-0.5 text-xs font-bold rounded bg-slate-100 text-slate-600 uppercase">-</span>
+      </div>
+    </div>
+    <div class="flex items-center space-x-3">
+      <button onclick="toggleDarkMode()" type="button" class="flex items-center gap-1 bg-slate-200 hover:bg-slate-300 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 text-xs font-bold px-3 py-2 rounded-lg transition" title="Alternar Tema">
+        <i data-lucide="moon" class="w-4 h-4 hidden dark:block"></i>
+        <i data-lucide="sun" class="w-4 h-4 block dark:hidden"></i>
+        <span class="hidden sm:inline">Tema</span>
+      </button>
+      <button onclick="window.logout()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 text-xs font-bold px-4 py-2 rounded-lg transition">Cerrar Sesión</button>
+    </div>
+  </div>
+
+  <!-- Selector rápido de planillas -->
+  <div class="max-w-4xl mx-auto px-4 mb-4 flex justify-start relative">
+    <div class="relative inline-block text-left">
+      <button onclick="togglePlanillasMenu()" type="button" class="inline-flex items-center gap-2 bg-white hover:bg-slate-50 text-slate-700 font-semibold py-2 px-4 rounded-xl shadow-sm border border-slate-200 text-xs transition-all">
+        <i data-lucide="layout-grid" class="w-4 h-4 text-red-600"></i>
+        <span>Planillas / Vistas</span>
+        <i data-lucide="chevron-down" class="w-3 h-3 text-slate-400"></i>
+      </button>
+
+      <div id="planillas-dropdown-menu" class="hidden origin-top-left absolute left-0 mt-2 w-56 rounded-xl shadow-lg bg-white ring-1 ring-black ring-opacity-5 divide-y divide-slate-100 focus:outline-none z-50">
+        <div class="py-1">
+          <span class="block px-4 py-2 text-[10px] font-bold uppercase tracking-wider text-slate-400">Personal de Salud</span>
+          <a href="#" onclick="cambiarVistaRapida('salud')" class="group flex items-center gap-2 px-4 py-2 text-xs text-slate-700 hover:bg-red-50 hover:text-red-700">
+            <i data-lucide="file-text" class="w-4 h-4 text-slate-400 group-hover:text-red-600"></i>
+            Historia Clínica Prehospitalaria
+          </a>
+        </div>
+        <div class="py-1">
+          <span class="block px-4 py-2 text-[10px] font-bold uppercase tracking-wider text-slate-400">Chofer de Unidad</span>
+          <a href="#" onclick="cambiarVistaRapida('chofer-relevo')" class="group flex items-center gap-2 px-4 py-2 text-xs text-slate-700 hover:bg-red-50 hover:text-red-700">
+            <i data-lucide="clipboard-check" class="w-4 h-4 text-slate-400 group-hover:text-red-600"></i>
+            Relevo de Guardia
+          </a>
+          <a href="#" onclick="cambiarVistaRapida('chofer-movimiento')" class="group flex items-center gap-2 px-4 py-2 text-xs text-slate-700 hover:bg-red-50 hover:text-red-700">
+            <i data-lucide="truck" class="w-4 h-4 text-slate-400 group-hover:text-red-600"></i>
+            Planilla de Movimiento
+          </a>
+        </div>
+        <div class="py-1 border-t border-slate-100">
+          <span class="block px-4 py-2 text-[10px] font-bold uppercase tracking-wider text-slate-400">Operador 107</span>
+          <a href="#" onclick="cambiarVistaRapida('operador')" class="group flex items-center gap-2 px-4 py-2 text-xs text-slate-700 hover:bg-red-50 hover:text-red-700">
+            <i data-lucide="phone" class="w-4 h-4 text-slate-400 group-hover:text-red-600"></i>
+            Operadores 107
+          </a>
+        </div>
+        <div class="py-1 border-t border-slate-100">
+          <a href="dashboard.html" target="_blank" class="bg-blue-800 hover:bg-blue-700 text-white px-3 py-2 rounded-md text-sm font-semibold flex items-center gap-2">
+            📊 Panel de Jefatura / Estadísticas
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Navegación para Choferes -->
+  <div id="nav-chofer" class="hidden flex space-x-2 mb-6 border-b pb-3">
+    <button id="btn-nav-relevo" onclick="window.switchChoferView('relevo')" class="px-4 py-2 text-sm font-bold bg-red-600 text-white rounded-lg shadow">1. Ficha Relevo de Móviles</button>
+    <button id="btn-nav-movimiento" onclick="window.switchChoferView('movimiento')" class="px-4 py-2 text-sm font-bold bg-slate-200 text-slate-700 rounded-lg">2. Planilla Movimiento de Móvil</button>
+  </div>
+
+  <!-- ==================== VISTA 1: PERSONAL DE SALUD ==================== -->
+  <div id="view-salud" class="hidden">
+    <div class="flex justify-end gap-2 mb-3 items-center">
+      <button onclick="toggleModalHistorial()" type="button" class="inline-flex items-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold py-2 px-3 rounded-lg shadow-sm border border-slate-200 text-xs transition-all">
+        <i data-lucide="history" class="w-4 h-4 text-slate-600"></i>
+        <span>Historial (<span id="contador-historial-badge-salud">0</span>)</span>
+      </button>
+      <button onclick="guardarPDF(window.generarNombreConFecha('Historia_Clinica_107'), 'form-historia-clinica')" class="bg-slate-800 hover:bg-slate-900 text-white font-bold text-xs px-4 py-2 rounded-lg shadow flex items-center gap-2">
+        <i data-lucide="download" class="w-4 h-4"></i> Descargar PDF
+      </button>
+      <button onclick="window.sendPDFToDrive('form-historia-clinica', window.generarNombreConFecha('Historia_Clinica_107'), 'Historia Clinica 107 - UTE Eldorado', event)" class="bg-red-600 hover:bg-red-700 text-white font-bold text-xs px-4 py-2 rounded-lg shadow flex items-center gap-2">
+        <i data-lucide="cloud-upload" class="w-4 h-4"></i> Subir a Google Drive
+      </button>
+    </div>
+
+    <form id="form-historia-clinica" class="bg-white p-6 rounded-xl shadow-lg border border-slate-200 space-y-6 text-xs">
+      <!-- Encabezado Oficial con Logo -->
+      <div class="border-b pb-4 flex justify-between items-start gap-4">
+        <div class="flex items-center gap-3">
+          <img src="image_935481.jpg" alt="Logo" class="w-12 h-12 object-contain" onerror="this.style.display='none'">
+          <div class="w-12 h-12 bg-red-600 rounded-full flex items-center justify-center text-white font-black text-xl">107</div>
+          <div>
+            <h1 class="text-base font-black text-slate-900 uppercase">Gobierno de Misiones | Ministerio de Salud Pública</h1>
+            <p class="text-xs font-bold text-red-600">UNIDAD CENTRAL DE EMERGENCIAS Y TRASLADOS - HISTORIA CLÍNICA PREHOSPITALARIA</p>
+          </div>
+        </div>
+        <div class="bg-slate-50 p-2.5 rounded-lg border text-right">
+          <div class="text-[10px] font-bold text-slate-400 uppercase">Fecha / Hora</div>
+          <input type="text" id="salud-fecha-hora" readonly class="bg-transparent font-bold text-slate-800 text-right outline-none w-full">
+        </div>
+      </div>
+
+      <!-- Encabezado Ficha -->
+      <div class="grid grid-cols-2 md:grid-cols-5 gap-3 bg-slate-50 p-3 rounded-lg border">
+        <div><label class="block font-bold text-slate-600">N° Emergencia</label><input type="text" id="num-emergencia" class="w-full p-1.5 border rounded bg-white mt-1"></div>
+        <div><label class="block font-bold text-slate-600">N° Intervención</label><input type="text" class="w-full p-1.5 border rounded bg-white mt-1"></div>
+        <div><label class="block font-bold text-slate-600">Ambulancia N°</label><input type="text" class="w-full p-1.5 border rounded bg-white mt-1"></div>
+        <div>
+          <label class="block font-bold text-slate-600">Auxilio Tipo</label>
+          <div class="flex gap-2 mt-1">
+            <label><input type="radio" name="auxilio" value="1"> 1</label>
+            <label><input type="radio" name="auxilio" value="2"> 2</label>
+            <label><input type="radio" name="auxilio" value="3"> 3</label>
+          </div>
+        </div>
+        <div>
+          <label class="block font-bold text-slate-600">Clima</label>
+          <select class="w-full p-1.5 border rounded bg-white mt-1">
+            <option>SOL</option><option>NEBL</option><option>LLUVI</option><option>NOCH</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Identificación del Paciente -->
+      <div class="bg-slate-50 p-3 rounded-lg border space-y-3">
+        <h2 class="font-bold text-slate-700 uppercase border-b pb-1">Identificación del Paciente y Lugar</h2>
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
+          <div class="md:col-span-2"><label class="block font-bold text-slate-600">Nombre y Apellido</label><input type="text" class="w-full p-1.5 border rounded bg-white mt-1"></div>
+          <div>
+            <label class="block font-bold text-slate-600">Sexo</label>
+            <div class="flex gap-4 mt-2">
+              <label><input type="radio" name="sexo" value="M"> Masculino</label>
+              <label><input type="radio" name="sexo" value="F"> Femenino</label>
+            </div>
+          </div>
+          <div><label class="block font-bold text-slate-600">Edad</label><input type="text" class="w-full p-1.5 border rounded bg-white mt-1"></div>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+          <div>
+            <label class="block font-bold text-slate-600 mb-1">Dirección (según DNI)</label>
+            <input type="text" class="w-full p-1.5 border rounded bg-white mt-1" placeholder="Dirección del DNI...">
+          </div>
+          <div>
+            <label class="block font-bold text-slate-600 mb-1">Tipo y Nº Documento</label>
+            <input type="text" class="w-full p-1.5 border rounded bg-white mt-1">
+          </div>
+          <div>
+            <label class="block font-bold text-slate-600 mb-1">Lugar</label>
+            <div class="flex items-center gap-4 py-1">
+              <label class="inline-flex items-center gap-1.5 cursor-pointer">
+                <input type="radio" name="lugar_tipo" value="via_publica" onchange="toggleLugarDetalle(this.value)">
+                <span>Vía Pública</span>
+              </label>
+              <label class="inline-flex items-center gap-1.5 cursor-pointer">
+                <input type="radio" name="lugar_tipo" value="domicilio" onchange="toggleLugarDetalle(this.value)">
+                <span>Domicilio</span>
+              </label>
+            </div>
+            <div id="campo-via-publica" class="hidden mt-2">
+              <input type="text" placeholder="Ubicación en Vía Pública..." class="w-full p-1.5 border rounded bg-white text-xs">
+            </div>
+            <div id="campo-domicilio" class="hidden mt-2">
+              <input type="text" placeholder="Dirección del Domicilio del hecho..." class="w-full p-1.5 border rounded bg-white text-xs">
+            </div>
+          </div>
+        </div>
+        <div class="grid grid-cols-2 md:grid-cols-2 gap-3">
+          <div><label class="block font-bold text-slate-600">Obra Social</label><input type="text" class="w-full p-1.5 border rounded bg-white mt-1"></div>
+          <div><label class="block font-bold text-slate-600">N° Afiliación</label><input type="text" class="w-full p-1.5 border rounded bg-white mt-1"></div>
+        </div>
+      </div>
+
+      <!-- Informe Central Operativa y Diagrama Anatómico -->
+      <div class="bg-slate-50 p-3 rounded-lg border space-y-3">
+        <h2 class="font-bold text-slate-700 uppercase border-b pb-1">Informe Central Operativa y Localización del Traumatismo</h2>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div class="md:col-span-2 grid grid-cols-2 gap-x-2 text-[11px]">
+            <label><input type="checkbox"> A. ACCIDENTE TRÁNSITO</label>
+            <label><input type="checkbox"> I. PRESIÓN ALTA/BAJA</label>
+            <label><input type="checkbox"> B. DOLOR TORÁCICO</label>
+            <label><input type="checkbox"> J. PÉRDIDA DE CONOCIMIENTO</label>
+            <label><input type="checkbox"> C. FATIGA / CIANOSIS</label>
+            <label><input type="checkbox"> K. CEFÁLEA / MAREOS</label>
+            <label><input type="checkbox"> D. SUDOR Y PALIDEZ</label>
+            <label><input type="checkbox"> L. CONVULSIONES</label>
+            <label><input type="checkbox"> E. PALPITACIONES</label>
+            <label><input type="checkbox"> M. DIFICULTAD PALABRA</label>
+            <label><input type="checkbox"> F. DOLOR ABDOMINAL</label>
+            <label><input type="checkbox"> N. TEMBLOR</label>
+            <label><input type="checkbox"> G. NÁUSEAS / VÓMITOS</label>
+            <label><input type="checkbox"> O. SÍNDROME PSIQUIÁTRICO</label>
+            <label><input type="checkbox"> H. HEMORRAGIAS</label>
+            <label><input type="checkbox"> P. HERIDA CORTOPENETRANTE</label>
+            <label><input type="checkbox"> Q. EMBARAZO / TRABAJO PARTO</label>
+            <label><input type="checkbox"> R. FIEBRE</label>
+            <label><input type="checkbox"> S. REACCIÓN ALÉRGICA</label>
+            <label><input type="checkbox"> T. INTOXICADO</label>
+            <label><input type="checkbox"> U. ELECTROCUTADO</label>
+            <label><input type="checkbox"> V. QUEMADURA</label>
+          </div>
+          <div class="text-center">
+            <label class="block font-bold text-slate-600 mb-1">Marque el Sitio del Traumatismo</label>
+            <div id="body-map" class="body-canvas-container" onclick="window.addDamagePoint(event)">
+              <svg viewBox="0 0 200 220" class="w-full h-full">
+                <!-- FRENTE -->
+                <g fill="#e2e8f0" stroke="#334155" stroke-width="1.5" stroke-linejoin="round">
+                  <circle cx="50" cy="22" r="11" />
+                  <path d="M 45 32 L 45 38 L 55 38 L 55 32 Z" />
+                  <path d="M 45 38 L 30 42 L 22 75 L 26 110 L 30 110 L 28 80 L 34 80 L 35 48 L 45 48 Z" />
+                  <path d="M 55 38 L 70 42 L 78 75 L 74 110 L 70 110 L 72 80 L 66 80 L 65 48 L 55 48 Z" />
+                  <path d="M 35 48 L 65 48 L 62 105 L 38 105 Z" />
+                  <path d="M 38 105 L 36 155 L 32 200 L 42 200 L 48 155 L 49 105 Z" />
+                  <path d="M 62 105 L 64 155 L 68 200 L 58 200 L 52 155 L 51 105 Z" />
+                </g>
+                <!-- DORSO -->
+                <g fill="#e2e8f0" stroke="#334155" stroke-width="1.5" stroke-linejoin="round">
+                  <circle cx="150" cy="22" r="11" />
+                  <path d="M 145 32 L 145 38 L 155 38 L 155 32 Z" />
+                  <path d="M 145 38 L 130 42 L 122 75 L 126 110 L 130 110 L 128 80 L 134 80 L 135 48 L 145 48 Z" />
+                  <path d="M 155 38 L 170 42 L 178 75 L 174 110 L 170 110 L 172 80 L 166 80 L 165 48 L 155 48 Z" />
+                  <path d="M 135 48 L 165 48 L 162 105 L 138 105 Z" />
+                  <path d="M 138 105 L 136 155 L 132 200 L 142 200 L 148 155 L 149 105 Z" />
+                  <path d="M 162 105 L 164 155 L 168 200 L 158 200 L 152 155 L 151 105 Z" />
+                </g>
+                <text x="50" y="215" text-anchor="middle" font-size="9" fill="#64748b" font-weight="bold">FRENTE</text>
+                <text x="150" y="215" text-anchor="middle" font-size="9" fill="#64748b" font-weight="bold">DORSO</text>
+              </svg>
+            </div>
+            <button type="button" onclick="window.clearDamagePoints()" class="text-[10px] text-red-600 underline mt-1">Limpiar Marcas</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Datos del Trauma -->
+      <div class="bg-slate-50 p-3 rounded-lg border space-y-3">
+        <h2 class="font-bold text-slate-700 uppercase border-b pb-1">Datos del Trauma</h2>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+          <div>
+            <label class="block font-bold text-slate-600">Vehicular</label>
+            <div class="space-y-1 mt-1">
+              <label class="block"><input type="checkbox"> AUTO</label>
+              <label class="block"><input type="checkbox"> BICICLETA</label>
+              <label class="block"><input type="checkbox"> CAMIÓN</label>
+              <label class="block"><input type="checkbox"> COLECTIVO</label>
+              <label class="block"><input type="checkbox"> MOTO</label>
+            </div>
+          </div>
+          <div>
+            <label class="block font-bold text-slate-600">Situación</label>
+            <div class="space-y-1 mt-1">
+              <label class="block"><input type="checkbox"> PEATÓN</label>
+              <label class="block"><input type="checkbox"> ACOMPAÑANTE</label>
+              <label class="block"><input type="checkbox"> TRASERO (D)</label>
+              <label class="block"><input type="checkbox"> TRASERO (I)</label>
+              <label class="block"><input type="checkbox"> CONDUCTOR</label>
+            </div>
+          </div>
+          <div>
+            <label class="block font-bold text-slate-600">Impacto / Condición</label>
+            <div class="space-y-1 mt-1">
+              <label class="block"><input type="checkbox"> FRONTAL</label>
+              <label class="block"><input type="checkbox"> LATERAL (D/I)</label>
+              <label class="block"><input type="checkbox"> VUELCO</label>
+              <label class="block"><input type="checkbox"> VÍCTIMA EXPULSADA</label>
+            </div>
+          </div>
+          <div>
+            <label class="block font-bold text-slate-600">Seguridad / Eventos</label>
+            <div class="space-y-1 mt-1">
+              <label class="block"><input type="checkbox"> CINTURÓN</label>
+              <label class="block"><input type="checkbox"> CASCO</label>
+              <label class="block"><input type="checkbox"> AIRBAG</label>
+              <label class="block"><input type="checkbox"> ARMA DE FUEGO / BLANCA</label>
+              <label class="block"><input type="checkbox"> QUEMADURA TÉRMINA/ELÉCTRICA</label>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Examen Físico / Signos Vitales -->
+      <div class="bg-slate-50 p-3 rounded-lg border space-y-3">
+        <h2 class="font-bold text-slate-700 uppercase border-b pb-1">Examen Físico / Signos Vitales</h2>
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-3">
+          <div><label class="block font-bold text-slate-600 mb-1">PULSO</label><input type="text" placeholder="bpm" class="w-full p-2 border rounded bg-white text-xs"></div>
+          <div><label class="block font-bold text-slate-600 mb-1">T.A.</label><input type="text" placeholder="mmHg" class="w-full p-2 border rounded bg-white text-xs"></div>
+          <div><label class="block font-bold text-slate-600 mb-1">GCS (Glasgow)</label><input type="text" placeholder="/15" class="w-full p-2 border rounded bg-white text-xs"></div>
+          <div><label class="block font-bold text-slate-600 mb-1">PUPILAS</label><input type="text" placeholder="Isocóricas..." class="w-full p-2 border rounded bg-white text-xs"></div>
+          <div><label class="block font-bold text-slate-600 mb-1">GLUCEMIA (HGT)</label><input type="text" placeholder="mmol/L" class="w-full p-2 border rounded bg-white text-xs"></div>
+        </div>
+      </div>
+
+      <!-- Clasificación del Diagnóstico Presuntivo -->
+      <div class="bg-slate-50 p-3 rounded-lg border space-y-3">
+        <h2 class="font-bold text-slate-700 uppercase border-b pb-1">Clasificación del Diagnóstico Presuntivo</h2>
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-x-3 gap-y-1 text-[10px] max-h-60 overflow-y-auto p-2 border rounded bg-white">
+          <label><input type="checkbox"> 1. CARDIOPATÍA ISQUÉMICA</label>
+          <label><input type="checkbox"> 2. ARRITMIA</label>
+          <label><input type="checkbox"> 3. INSUFICIENCIA CARDÍACA</label>
+          <label><input type="checkbox"> 4. HIPERTENSIÓN ARTERIAL</label>
+          <label><input type="checkbox"> 5. HIPOTENSIÓN ARTERIAL</label>
+          <label><input type="checkbox"> 6. VARICORRAGIA</label>
+          <label><input type="checkbox"> 7. SÍNDROME GÁSTRICO/ÚLCERA</label>
+          <label><input type="checkbox"> 8. CÓLICO BILIAR</label>
+          <label><input type="checkbox"> 9. CÓLICO INTESTINAL</label>
+          <label><input type="checkbox"> 10. ABDOMEN AGUDO</label>
+          <label><input type="checkbox"> 11. HEMATEMESIS</label>
+          <label><input type="checkbox"> 12. PROCTORRAGIA</label>
+          <label><input type="checkbox"> 13. TRAUMATISMO LEVE</label>
+          <label><input type="checkbox"> 14. TRAUMATISMO MÚLTIPLE</label>
+          <label><input type="checkbox"> 15. AMPUTACIÓN</label>
+          <label><input type="checkbox"> 16. HERIDA CORTANTE</label>
+          <label><input type="checkbox"> 17. REUMATOLÓGICAS</label>
+          <label><input type="checkbox"> 18. LUMBOCIATALGIAS</label>
+          <label><input type="checkbox"> 19. ASMA - BRONCOESPASMO</label>
+          <label><input type="checkbox"> 20. INSUFICIENCIA RESP. AGUDA</label>
+          <label><input type="checkbox"> 21. EDEMA AGUDO DE PULMÓN</label>
+          <label><input type="checkbox"> 22. ENFISEMA/BRONCOPATÍA CRÓNICA</label>
+          <label><input type="checkbox"> 23. NEUMONÍA</label>
+          <label><input type="checkbox"> 24. NEUMOTÓRAX</label>
+          <label><input type="checkbox"> 25. HEMOPTISIS</label>
+          <label><input type="checkbox"> 26. CÓLICO RENAL</label>
+          <label><input type="checkbox"> 27. INFECCIÓN URINARIA</label>
+          <label><input type="checkbox"> 28. HEMATURIA</label>
+          <label><input type="checkbox"> 29. METRORRAGIA</label>
+          <label><input type="checkbox"> 30. AMENAZA DE ABORTO</label>
+          <label><input type="checkbox"> 31. AMENAZA PARTO PREM.</label>
+          <label><input type="checkbox"> 32. EMBARAZO A TÉRMINO</label>
+          <label><input type="checkbox"> 33. ENFERMEDAD DE LA PIEL</label>
+          <label><input type="checkbox"> 34. ACV</label>
+          <label><input type="checkbox"> 35. AIT</label>
+          <label><input type="checkbox"> 36. CONVULSIONES</label>
+          <label><input type="checkbox"> 37. ELECTROCUCIÓN</label>
+          <label><input type="checkbox"> 38. COMA</label>
+          <label><input type="checkbox"> 39. HIPOGLUCEM./HIPERGLUCEM.</label>
+          <label><input type="checkbox"> 40. TOXICOLÓGICAS/INTENT.</label>
+          <label><input type="checkbox"> 41. ENF. HEMATOLÓGICAS</label>
+          <label><input type="checkbox"> 42. DESHIDRATACIÓN</label>
+          <label><input type="checkbox"> 43. ALERGIAS</label>
+          <label><input type="checkbox"> 44. HIV</label>
+          <label><input type="checkbox"> 45. CÁNCER</label>
+          <label><input type="checkbox"> 46. ÓBITO</label>
+          <label><input type="checkbox"> 47. S. GRIPAL</label>
+          <label><input type="checkbox"> 48. FARINGITIS</label>
+          <label><input type="checkbox"> 49. BRONQUITIS</label>
+          <label><input type="checkbox"> 50. HERIDA ARMA BLANCA</label>
+          <label><input type="checkbox"> 51. HERIDA ARMA DE FUEGO</label>
+          <label><input type="checkbox"> 52. PARTO EN DOMICILIO</label>
+          <label><input type="checkbox"> 53. MUERTE EN DOMICILIO</label>
+          <label><input type="checkbox" id="chk-diagnostico-otros" onchange="toggleOtroDiagnostico(this)"> 54. OTROS</label>
+        </div>
+
+        <div id="campo-otro-diagnostico" class="hidden">
+          <label class="block font-bold text-slate-600 mb-1">Especificar Otro Diagnóstico:</label>
+          <input type="text" id="input-otro-diagnostico" placeholder="Escriba el diagnóstico..." class="w-full p-2 border rounded bg-white text-xs">
+        </div>
+
+        <div>
+          <label class="block font-bold text-slate-600">Destino</label>
+          <div class="flex flex-wrap gap-3 mt-1">
+            <label><input type="radio" name="destino" value="domicilio"> QUEDA EN DOMICILIO</label>
+            <label><input type="radio" name="destino" value="traslado"> TRASLADO</label>
+            <label><input type="radio" name="destino" value="no_se_encuentra"> NO SE ENCUENTRA EN EL LUGAR</label>
+            <label><input type="radio" name="destino" value="rehusado"> SE NIEGA A SER TRASLADADO</label>
+          </div>
+        </div>
+        <div>
+          <label class="block font-bold text-slate-600">Hospital / Sanatorio Destino</label>
+          <input type="text" class="w-full p-1.5 border rounded bg-white mt-1">
+        </div>
+        <div>
+          <label class="block font-bold text-slate-600">Observaciones e Intervención Policial / Comisaría / Móvil</label>
+          <textarea rows="2" class="w-full p-1.5 border rounded bg-white mt-1"></textarea>
+        </div>
+      </div>
+
+      <!-- FIRMAS -->
+      <div class="bg-slate-50 p-3 rounded-lg border space-y-3">
+        <h2 class="font-bold text-slate-700 uppercase border-b pb-1">Firmas</h2>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div class="flex flex-col items-center space-y-2 bg-white p-3 border rounded-lg">
+            <span class="font-bold text-slate-700">Firma Paramédico</span>
+            <canvas id="signature-pad-paramedico" class="border border-slate-300 rounded bg-white w-full h-28 touch-none"></canvas>
+            <button type="button" onclick="window.clearCanvas('signature-pad-paramedico')" class="text-red-500 hover:text-red-700 text-[10px] underline">Limpiar</button>
+            <div class="w-full space-y-1 pt-1">
+              <input type="text" placeholder="Aclaración: Nombre y Apellido" class="w-full p-1.5 border rounded bg-slate-50 text-xs">
+              <input type="text" placeholder="Matrícula N°" class="w-full p-1.5 border rounded bg-slate-50 text-xs">
+            </div>
+          </div>
+          <div class="flex flex-col items-center space-y-2 bg-white p-3 border rounded-lg">
+            <span class="font-bold text-slate-700">Firma Médico Receptor</span>
+            <canvas id="signature-pad-medico" class="border border-slate-300 rounded bg-white w-full h-28 touch-none"></canvas>
+            <button type="button" onclick="window.clearCanvas('signature-pad-medico')" class="text-red-500 hover:text-red-700 text-[10px] underline">Limpiar</button>
+            <div class="w-full pt-1">
+              <input type="text" placeholder="Aclaración: Nombre y Apellido" class="w-full p-1.5 border rounded bg-slate-50 text-xs">
+            </div>
+          </div>
+          <div class="flex flex-col items-center space-y-2 bg-white p-3 border rounded-lg">
+            <span class="font-bold text-slate-700">Firma Familiar / Responsable</span>
+            <canvas id="signature-pad-familiar" class="border border-slate-300 rounded bg-white w-full h-28 touch-none"></canvas>
+            <button type="button" onclick="window.clearCanvas('signature-pad-familiar')" class="text-red-500 hover:text-red-700 text-[10px] underline">Limpiar</button>
+            <div class="w-full pt-1">
+              <input type="text" placeholder="Aclaración: Nombre y Apellido" class="w-full p-1.5 border rounded bg-slate-50 text-xs">
+            </div>
+          </div>
+        </div>
+      </div>
+    </form>
+  </div>
+
+  <!-- ==================== VISTA 2: CHOFER - FICHA DE RELEVO DE MÓVILES ==================== -->
+  <div id="view-chofer-relevo" class="hidden w-full space-y-4">
+    <div class="flex justify-end gap-2 mb-3 items-center">
+      <button onclick="toggleModalHistorial()" type="button" class="inline-flex items-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold py-2 px-3 rounded-lg shadow-sm border border-slate-200 text-xs transition-all">
+        <i data-lucide="history" class="w-4 h-4 text-slate-600"></i>
+        <span>Historial (<span id="contador-historial-badge-relevo">0</span>)</span>
+      </button>
+      <button onclick="window.downloadPDF('form-ficha-relevo', window.generarNombreConFecha('Ficha_Relevo_Moviles'))" class="bg-slate-800 hover:bg-slate-900 text-white font-bold text-xs px-4 py-2 rounded-lg shadow flex items-center gap-2">
+        <i data-lucide="download" class="w-4 h-4"></i> Descargar PDF
+      </button>
+      <button onclick="window.sendPDFToDrive('form-ficha-relevo', window.generarNombreConFecha('Ficha_Relevo_Moviles'), 'Ficha Relevo de Móviles - UTE Eldorado', event)" class="bg-red-600 hover:bg-red-700 text-white font-bold text-xs px-4 py-2 rounded-lg shadow flex items-center gap-2">
+        <i data-lucide="cloud-upload" class="w-4 h-4"></i> Subir a Google Drive
+      </button>
+    </div>
+
+    <form id="form-ficha-relevo" class="bg-white p-6 rounded-xl shadow-lg border border-slate-200 space-y-6 text-xs">
+      <div class="border-b pb-3 flex justify-between items-center">
+        <div class="flex items-center gap-3">
+          <img src="image_935481.jpg" alt="Logo" class="w-10 h-10 object-contain" onerror="this.style.display='none'">
+          <div>
+            <h1 class="text-base font-black text-slate-900 uppercase">Declaración Jurada - Ficha de Relevo de Móviles</h1>
+            <p class="text-xs text-slate-500 font-semibold">Ministerio de Salud Pública - Misiones</p>
+          </div>
+        </div>
+        <div class="bg-slate-50 p-2 rounded border text-right">
+          <input type="text" id="relevo-fecha-hora" readonly class="bg-transparent font-bold text-slate-800 text-right outline-none">
+        </div>
+      </div>
+
+      <!-- DATOS DEL MÓVIL -->
+      <div class="bg-slate-50 p-3 rounded-lg border space-y-3">
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+          <div><label class="block font-bold text-slate-600">Marca de Móvil</label><input type="text" class="w-full p-1.5 border rounded bg-white mt-1"></div>
+          <div><label class="block font-bold text-slate-600">N° de Móvil</label><input type="text" class="w-full p-1.5 border rounded bg-white mt-1"></div>
+          <div><label class="block font-bold text-slate-600">Dominio / Patente</label><input type="text" class="w-full p-1.5 border rounded bg-white mt-1"></div>
+          <div><label class="block font-bold text-slate-600">Km. Actual</label><input type="number" class="w-full p-1.5 border rounded bg-white mt-1"></div>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+          <div><label class="block font-bold text-slate-600">Chofer Ant.</label><input type="text" class="w-full p-1.5 border rounded bg-white mt-1"></div>
+          <div><label class="block font-bold text-slate-600">Chofer Ent.</label><input type="text" class="w-full p-1.5 border rounded bg-white mt-1"></div>
+          <div><label class="block font-bold text-slate-600">Chofer Post.</label><input type="text" class="w-full p-1.5 border rounded bg-white mt-1"></div>
+        </div>
+        <div class="grid grid-cols-3 gap-3">
+          <div><label class="block font-bold text-slate-600">Licencia N°</label><input type="text" class="w-full p-1.5 border rounded bg-white mt-1"></div>
+          <div><label class="block font-bold text-slate-600">Cat. Licencia</label><input type="text" class="w-full p-1.5 border rounded bg-white mt-1"></div>
+          <div><label class="block font-bold text-slate-600">Vencim. Licencia</label><input type="date" class="w-full p-1.5 border rounded bg-white mt-1"></div>
+        </div>
+      </div>
+
+      <!-- Controles y Funcionamiento -->
+      <div class="bg-slate-50 p-3 rounded-lg border space-y-3">
+        <h2 class="font-bold text-slate-700 uppercase border-b pb-1">Controles de Estado y Funcionalidad</h2>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
+          <div class="p-2 bg-white border rounded">
+            <span class="font-bold block mb-1">Lavado Exterior</span>
+            <label class="mr-2"><input type="radio" name="lav_ext" value="SI"> SI</label>
+            <label><input type="radio" name="lav_ext" value="NO"> NO</label>
+          </div>
+          <div class="p-2 bg-white border rounded">
+            <span class="font-bold block mb-1">Lavado Interior</span>
+            <label class="mr-2"><input type="radio" name="lav_int" value="SI"> SI</label>
+            <label><input type="radio" name="lav_int" value="NO"> NO</label>
+          </div>
+          <div class="p-2 bg-white border rounded">
+            <span class="font-bold block mb-1">Lavado Motor</span>
+            <label class="mr-2"><input type="radio" name="lav_mot" value="SI"> SI</label>
+            <label><input type="radio" name="lav_mot" value="NO"> NO</label>
+          </div>
+          <div class="p-2 bg-white border rounded">
+            <span class="font-bold block mb-1">Lavado Chasis</span>
+            <label class="mr-2"><input type="radio" name="lav_cha" value="SI"> SI</label>
+            <label><input type="radio" name="lav_cha" value="NO"> NO</label>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 md:grid-cols-3 gap-2">
+          <label class="p-1.5 border rounded bg-white flex justify-between">Luces Posición <input type="checkbox"></label>
+          <label class="p-1.5 border rounded bg-white flex justify-between">Luces Direccionales <input type="checkbox"></label>
+          <label class="p-1.5 border rounded bg-white flex justify-between">Luces Altas / Bajas <input type="checkbox"></label>
+          <label class="p-1.5 border rounded bg-white flex justify-between">Sirena / Balizas <input type="checkbox"></label>
+          <label class="p-1.5 border rounded bg-white flex justify-between">Limpiaparabrisas <input type="checkbox"></label>
+          <label class="p-1.5 border rounded bg-white flex justify-between">Calefactor y A/C <input type="checkbox"></label>
+          <label class="p-1.5 border rounded bg-white flex justify-between">Matafuegos Vencimiento <input type="checkbox"></label>
+          <label class="p-1.5 border rounded bg-white flex justify-between">Rueda de Auxilio / Gato <input type="checkbox"></label>
+          <label class="p-1.5 border rounded bg-white flex justify-between">Equipo Comunicación <input type="checkbox"></label>
+        </div>
+
+        <div>
+          <label class="block font-bold text-slate-600">Nivel de Combustible</label>
+          <select class="w-full p-2 border rounded bg-white mt-1 font-bold">
+            <option>1/4 Tanque</option>
+            <option>1/2 Tanque</option>
+            <option>3/4 Tanque</option>
+            <option selected>Tanque Lleno</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block font-bold text-slate-600">DECLARO BAJO JURAMENTO / Algo para declarar:</label>
+          <textarea rows="2" class="w-full p-2 border rounded bg-white mt-1" placeholder="Rayones, roturas, faltantes..."></textarea>
+        </div>
+      </div>
+
+      <!-- Firmas -->
+      <div class="bg-slate-50 p-3 rounded-lg border space-y-3">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-center">
+          <div>
+            <label class="block font-bold text-slate-600 mb-1">Chofer Entrante (Nombre, Apellido, DNI)</label>
+            <canvas id="canvas-chofer-entrante" class="border rounded bg-white mx-auto touch-none w-full h-20 cursor-crosshair"></canvas>
+            <button type="button" onclick="window.clearCanvas('canvas-chofer-entrante')" class="text-[10px] text-red-600 underline mt-1">Limpiar</button>
+          </div>
+          <div>
+            <label class="block font-bold text-slate-600 mb-1">Chofer Saliente (Nombre, Apellido, DNI)</label>
+            <canvas id="canvas-chofer-saliente" class="border rounded bg-white mx-auto touch-none w-full h-20 cursor-crosshair"></canvas>
+            <button type="button" onclick="window.clearCanvas('canvas-chofer-saliente')" class="text-[10px] text-red-600 underline mt-1">Limpiar</button>
+          </div>
+        </div>
+      </div>
+    </form>
+  </div>
+
+  <!-- ==================== VISTA 3: CHOFER - PLANILLA MOVIMIENTO DE MÓVIL ==================== -->
+  <div id="view-chofer-movimiento" class="hidden">
+    <div class="flex justify-end gap-2 mb-3 items-center">
+      <button onclick="toggleModalHistorial()" type="button" class="inline-flex items-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold py-2 px-3 rounded-lg shadow-sm border border-slate-200 text-xs transition-all">
+        <i data-lucide="history" class="w-4 h-4 text-slate-600"></i>
+        <span>Historial (<span id="contador-historial-badge-mov">0</span>)</span>
+      </button>
+      <button onclick="window.downloadPDF('form-movimiento-movil', window.generarNombreConFecha('Planilla_Movimiento_Movil'))" class="bg-slate-800 hover:bg-slate-900 text-white font-bold text-xs px-4 py-2 rounded-lg shadow flex items-center gap-2">
+        <i data-lucide="download" class="w-4 h-4"></i> Descargar PDF
+      </button>
+      <button onclick="window.sendPDFToDrive('form-movimiento-movil', window.generarNombreConFecha('Planilla_Movimiento_Movil'), 'Planilla Movimiento de Móvil - UTE Eldorado', event)" class="bg-red-600 hover:bg-red-700 text-white font-bold text-xs px-4 py-2 rounded-lg shadow flex items-center gap-2">
+        <i data-lucide="cloud-upload" class="w-4 h-4"></i> Subir a Google Drive
+      </button>
+    </div>
+
+    <form id="form-movimiento-movil" class="bg-white p-6 rounded-xl shadow-lg border border-slate-200 space-y-6 text-xs">
+      <div class="border-b pb-3 flex justify-between items-center">
+        <div class="flex items-center gap-3">
+          <img src="image_935481.jpg" alt="Logo" class="w-10 h-10 object-contain" onerror="this.style.display='none'">
+          <div>
+            <h1 class="text-base font-black text-slate-900 uppercase">Planilla de Movimiento de Móvil</h1>
+            <p class="text-xs text-slate-500 font-semibold">Gobierno de Misiones - Ministerio de Salud Pública - UNIDAD DE TRASLADOS</p>
+          </div>
+        </div>
+        <div class="bg-slate-50 p-2 rounded border text-right">
+          <input type="text" id="movimiento-fecha-hora" readonly class="bg-transparent font-bold text-slate-800 text-right outline-none">
+        </div>
+      </div>
+
+      <!-- Tripulación -->
+      <div class="bg-slate-50 p-3 rounded-lg border space-y-2">
+        <h2 class="font-bold text-slate-700 uppercase border-b pb-1">Tripulación</h2>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+          <div><label class="block font-bold text-slate-600">1. Médico</label><input type="text" class="w-full p-1.5 border rounded bg-white mt-1"></div>
+          <div><label class="block font-bold text-slate-600">2. Enfermero</label><input type="text" class="w-full p-1.5 border rounded bg-white mt-1"></div>
+          <div><label class="block font-bold text-slate-600">3. Chofer</label><input type="text" class="w-full p-1.5 border rounded bg-white mt-1"></div>
+        </div>
+      </div>
+
+      <!-- Tabla Movimientos -->
+      <div class="overflow-x-auto w-full bg-slate-50 p-3 rounded-lg border space-y-3">
+        <div class="flex justify-between items-center border-b pb-1">
+          <h2 class="font-bold text-slate-700 uppercase">Registro de Salidas y Regresos</h2>
+          <button type="button" onclick="window.agregarFilaTablaMovimientos()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs px-2.5 py-1 rounded shadow flex items-center gap-1 transition-all">
+            <span class="text-base font-bold">+</span> Agregar Fila
+          </button>
+        </div>
+
+        <table class="w-full text-left border-collapse min-w-[700px]">
+          <thead>
+            <tr class="bg-slate-200 text-slate-700 font-bold">
+              <th class="p-1 border" colspan="3">Salida / Destino</th>
+              <th class="p-1 border" colspan="2">Llegada a Destino</th>
+              <th class="p-1 border">N° Serv.</th>
+              <th class="p-1 border" colspan="2">Regreso a Base</th>
+            </tr>
+            <tr class="bg-slate-100 text-slate-600">
+              <th class="p-1 border">Hora</th>
+              <th class="p-1 border">Kms.</th>
+              <th class="p-1 border">Cód. / Destino</th>
+              <th class="p-1 border">Hora</th>
+              <th class="p-1 border">Kms.</th>
+              <th class="p-1 border">N°</th>
+              <th class="p-1 border">Hora</th>
+              <th class="p-1 border">Kms.</th>
+            </tr>
+          </thead>
+          <tbody id="tbody-movimientos">
+            <tr>
+              <td class="border p-1"><input type="time" class="w-full p-1 bg-white border rounded"></td>
+              <td class="border p-1"><input type="number" class="w-full p-1 bg-white border rounded"></td>
+              <td class="border p-1"><input type="text" class="w-full p-1 bg-white border rounded"></td>
+              <td class="border p-1"><input type="time" class="w-full p-1 bg-white border rounded"></td>
+              <td class="border p-1"><input type="number" class="w-full p-1 bg-white border rounded"></td>
+              <td class="border p-1"><input type="text" class="w-full p-1 bg-white border rounded"></td>
+              <td class="border p-1"><input type="time" class="w-full p-1 bg-white border rounded"></td>
+              <td class="border p-1"><input type="number" class="w-full p-1 bg-white border rounded"></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- CARGA DE COMBUSTIBLES -->
+      <div class="bg-slate-50 p-3 rounded-lg border space-y-3">
+        <h2 class="font-bold text-slate-700 uppercase border-b pb-1">Carga de Combustibles</h2>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div class="p-2 border rounded-lg bg-white space-y-2">
+            <div class="flex items-center gap-2">
+              <span class="font-bold text-slate-600">Fecha:</span>
+              <input type="date" class="p-1 border rounded text-xs flex-1">
+              <span class="font-bold text-slate-600">Litros:</span>
+              <input type="text" placeholder="0" class="p-1 border rounded text-xs w-16">
+            </div>
+            <div class="flex items-center gap-2 pt-1 border-t border-slate-100">
+              <label class="cursor-pointer bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 font-bold px-2 py-1 rounded-md text-xs flex items-center gap-1 transition-all">
+                <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+                <span>Adjuntar Vale</span>
+                <input type="file" accept="image/jpeg, image/jpg, image/png" class="hidden" onchange="previewVale(this, 'preview-vale-1')">
+              </label>
+              <span id="preview-vale-1" class="text-[10px] text-slate-500 truncate max-w-[150px]">Sin archivo</span>
+            </div>
+          </div>
+          <div class="p-2 border rounded-lg bg-white space-y-2">
+            <div class="flex items-center gap-2">
+              <span class="font-bold text-slate-600">Fecha:</span>
+              <input type="date" class="p-1 border rounded text-xs flex-1">
+              <span class="font-bold text-slate-600">Litros:</span>
+              <input type="text" placeholder="0" class="p-1 border rounded text-xs w-16">
+            </div>
+            <div class="flex items-center gap-2 pt-1 border-t border-slate-100">
+              <label class="cursor-pointer bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 font-bold px-2 py-1 rounded-md text-xs flex items-center gap-1 transition-all">
+                <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+                <span>Adjuntar Vale</span>
+                <input type="file" accept="image/jpeg, image/jpg, image/png" class="hidden" onchange="previewVale(this, 'preview-vale-2')">
+              </label>
+              <span id="preview-vale-2" class="text-[10px] text-slate-500 truncate max-w-[150px]">Sin archivo</span>
+            </div>
+          </div>
+          <div class="p-2 border rounded-lg bg-white space-y-2">
+            <div class="flex items-center gap-2">
+              <span class="font-bold text-slate-600">Fecha:</span>
+              <input type="date" class="p-1 border rounded text-xs flex-1">
+              <span class="font-bold text-slate-600">Litros:</span>
+              <input type="text" placeholder="0" class="p-1 border rounded text-xs w-16">
+            </div>
+            <div class="flex items-center gap-2 pt-1 border-t border-slate-100">
+              <label class="cursor-pointer bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 font-bold px-2 py-1 rounded-md text-xs flex items-center gap-1 transition-all">
+                <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+                <span>Adjuntar Vale</span>
+                <input type="file" accept="image/jpeg, image/jpg, image/png" class="hidden" onchange="previewVale(this, 'preview-vale-3')">
+              </label>
+              <span id="preview-vale-3" class="text-[10px] text-slate-500 truncate max-w-[150px]">Sin archivo</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Firma -->
+      <div class="bg-slate-50 p-3 rounded-lg border text-center space-y-2">
+        <label class="block font-bold text-slate-600">Firma del Chofer</label>
+        <canvas id="canvas-chofer-mov" class="border rounded bg-white mx-auto touch-none w-full max-w-xs h-20 cursor-crosshair"></canvas>
+        <button type="button" onclick="window.clearCanvas('canvas-chofer-mov')" class="text-[10px] text-red-600 underline">Limpiar Firma</button>
+      </div>
+    </form>
+  </div>
+
+  <!-- ==================== VISTA 4: OPERADORES 107 ==================== -->
+  <div id="view-operador" class="hidden max-w-4xl mx-auto px-4">  
+    <div class="flex justify-between items-center mb-4 gap-2 flex-wrap">
+      <div class="text-xs font-semibold text-slate-600 bg-slate-100 px-3 py-2 rounded-lg border border-slate-200">
+        Fecha/Hora Actual: <span id="clock-operador" class="font-bold text-red-600">--/--/---- --:--:--</span>
+      </div>
+      <div class="flex items-center gap-2">
+        <button onclick="toggleModalHistorial()" type="button" class="inline-flex items-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold py-2 px-3 rounded-lg shadow-sm border border-slate-200 text-xs transition-all">
+          <i data-lucide="history" class="w-4 h-4"></i>
+          <span>Historial (<span id="contador-historial-badge-operador">0</span>)</span>
+        </button>
+        <button onclick="guardarPDF(window.generarNombreOperador('Planilla_Operadores_107'), 'form-operadores')" class="bg-slate-800 hover:bg-slate-900 text-white font-bold text-xs px-4 py-2 rounded-lg shadow flex items-center gap-2">
+          <i data-lucide="download" class="w-4 h-4"></i> Descargar PDF
+        </button>
+        <button onclick="window.sendPDFToDrive('form-operadores', window.generarNombreOperador('Planilla_Operadores_107'), 'Planilla Operadores 107 - UTE Eldorado', event)" class="bg-red-600 hover:bg-red-700 text-white font-bold text-xs px-4 py-2 rounded-lg shadow flex items-center gap-2">
+          <i data-lucide="cloud-upload" class="w-4 h-4"></i> Subir a Google Drive
+        </button>
+      </div>
+    </div>
+
+    <form id="form-operadores" class="bg-white p-6 rounded-xl shadow-lg border border-slate-200 space-y-6 text-xs">
+      <!-- Encabezado Oficial con Logo -->
+      <div class="border-b pb-4 flex justify-between items-start gap-4">
+        <div class="flex items-center gap-3">
+          <img src="image_935481.jpg" alt="Logo" class="w-12 h-12 object-contain" onerror="this.style.display='none'">
+          <div class="w-12 h-12 bg-red-600 rounded-full flex items-center justify-center text-white font-black text-xl">107</div>
+          <div>
+            <h2 class="font-bold text-base text-slate-800 uppercase">Planillas de Emergencias del 107</h2>
+            <p class="text-[11px] text-slate-500">Ministerio de Salud Pública - Provincia de Misiones</p>
+          </div>
+        </div>
+        <div class="grid grid-cols-2 gap-2 text-right">
+          <div>
+            <label class="block font-bold text-slate-600">Hs. Ingreso:</label>
+            <input type="time" name="hs_ingreso" class="border border-slate-300 rounded p-1 text-xs w-28">
+          </div>
+          <div>
+            <label class="block font-bold text-slate-600">Hs. Salida:</label>
+            <input type="time" name="hs_salida" class="border border-slate-300 rounded p-1 text-xs w-28">
+          </div>
+        </div>
+      </div>
+
+      <!-- Tabla de Registros -->
+      <div class="overflow-x-auto">
+        <table class="w-full border-collapse border border-slate-300 text-left">
+          <thead>
+            <tr class="bg-slate-100 text-slate-700 font-bold text-center border-b border-slate-300">
+              <th class="border border-slate-300 p-2 w-10">#</th>
+              <th class="border border-slate-300 p-2">Horarios (Pedido / Salida / Llegada)</th>
+              <th class="border border-slate-300 p-2">Paciente (Nombre / DNI / Edad / Obra Social)</th>
+              <th class="border border-slate-300 p-2">Atención y Personal (Lugar / Médico-Enf / Chofer / Móvil)</th>
+              <th class="border border-slate-300 p-2">Diagnóstico y Receptor (Diagnóstico / Hosp. Receptor / Médico Receptor / Obs)</th>
+              <th class="border border-slate-300 p-2 w-12">Acción</th>
+            </tr>
+          </thead>
+          <tbody id="tabla-registros-operador">
+            <tr class="border-b border-slate-200">
+              <td class="border border-slate-300 p-1 text-center font-bold">1</td>
+              <td class="border border-slate-300 p-1 space-y-1">
+                <input type="text" placeholder="Pedido (hs)" class="w-full border p-1 rounded text-[11px]">
+                <input type="time" placeholder="Hora Salida" class="w-full border p-1 rounded text-[11px]">
+                <input type="time" placeholder="Hora Llegada" class="w-full border p-1 rounded text-[11px]">
+              </td>
+              <td class="border border-slate-300 p-1 space-y-1">
+                <input type="text" placeholder="1- Apellido y Nombre" class="w-full border p-1 rounded text-[11px]">
+                <input type="text" placeholder="2- D.N.I." class="w-full border p-1 rounded text-[11px]">
+                <div class="flex gap-1">
+                  <input type="text" placeholder="3- Edad" class="w-1/2 border p-1 rounded text-[11px]">
+                  <input type="text" placeholder="4- Obra Social y N°" class="w-1/2 border p-1 rounded text-[11px]">
+                </div>
+              </td>
+              <td class="border border-slate-300 p-1 space-y-1">
+                <input type="text" placeholder="1- Lugar de la atención" class="w-full border p-1 rounded text-[11px]">
+                <input type="text" placeholder="2- Médico / Enfermero actuante" class="w-full border p-1 rounded text-[11px]">
+                <div class="flex gap-1">
+                  <input type="text" placeholder="3- Chofer actuante" class="w-1/2 border p-1 rounded text-[11px]">
+                  <input type="text" placeholder="4- Móvil actuante" class="w-1/2 border p-1 rounded text-[11px]">
+                </div>
+              </td>
+              <td class="border border-slate-300 p-1 space-y-1">
+                <input type="text" placeholder="1- DIAGNÓSTICO" class="w-full border p-1 rounded text-[11px]">
+                <input type="text" placeholder="2- Hospital Receptor" class="w-full border p-1 rounded text-[11px]">
+                <input type="text" placeholder="3- Médico Receptor" class="w-full border p-1 rounded text-[11px]">
+                <input type="text" placeholder="4- Observaciones" class="w-full border p-1 rounded text-[11px]">
+              </td>
+              <td class="border border-slate-300 p-1 text-center">
+                <button type="button" onclick="eliminarFilaOperador(this)" class="text-red-600 hover:text-red-800 font-bold">✕</button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="mt-2">
+          <button type="button" onclick="agregarFilaOperador()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold text-xs py-1 px-3 rounded">+ Agregar Fila</button>
+        </div>
+      </div>
+
+      <!-- Firmas Operador -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 border-t border-slate-200">
+        <div class="border p-3 rounded-lg bg-slate-50 space-y-2">
+          <label class="font-bold text-slate-700 block text-xs">OPERADOR SALIENTE</label>
+          <div>
+            <label class="block text-[10px] text-slate-500">Nombre completo y aclaración:</label>
+            <input type="text" name="aclaracion_operador_saliente" placeholder="Nombre completo" class="w-full border border-slate-300 rounded p-1 text-xs">
+          </div>
+          <div>
+            <label class="block text-[10px] text-slate-500">Firma digital / Canvas:</label>
+            <canvas id="canvas-firma-saliente" class="border border-slate-300 bg-white rounded w-full h-20 cursor-crosshair touch-none"></canvas>
+            <button type="button" onclick="window.clearCanvas('canvas-firma-saliente')" class="text-[10px] text-red-600 underline mt-1">Limpiar Firma</button>
+          </div>
+        </div>
+        <div class="border p-3 rounded-lg bg-slate-50 space-y-2">
+          <label class="font-bold text-slate-700 block text-xs">OPERADOR ENTRANTE</label>
+          <div>
+            <label class="block text-[10px] text-slate-500">Nombre completo y aclaración:</label>
+            <input type="text" name="aclaracion_operador_entrante" placeholder="Nombre completo" class="w-full border border-slate-300 rounded p-1 text-xs">
+          </div>
+          <div>
+            <label class="block text-[10px] text-slate-500">Firma digital / Canvas:</label>
+            <canvas id="canvas-firma-entrante" class="border border-slate-300 bg-white rounded w-full h-20 cursor-crosshair touch-none"></canvas>
+            <button type="button" onclick="window.clearCanvas('canvas-firma-entrante')" class="text-[10px] text-red-600 underline mt-1">Limpiar Firma</button>
+          </div>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Modal Historial -->
+<div id="modal-historial" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+  <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg p-6 space-y-4 border border-slate-200 text-xs">
+    <div class="flex justify-between items-center border-b pb-3">
+      <div class="flex items-center gap-2 font-bold text-slate-800 text-sm">
+        <i data-lucide="history" class="w-5 h-5 text-red-600"></i>
+        <span>Historial de Planillas Generadas (Sesión Actual)</span>
+      </div>
+      <button onclick="toggleModalHistorial()" class="text-slate-400 hover:text-slate-600 font-bold text-sm">✕</button>
+    </div>
+    <div id="lista-historial-items" class="space-y-2 max-h-60 overflow-y-auto">
+      <p class="text-slate-400 italic text-center py-4">No hay planillas generadas en esta sesión todavía.</p>
+    </div>
+    <div class="flex justify-end pt-2 border-t">
+      <button onclick="toggleModalHistorial()" class="bg-slate-800 text-white font-bold px-4 py-2 rounded-lg text-xs">Cerrar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbx2KtLEkQlUztTRfDJzqNld9t3skGdbYRyMSrG48rmhCD5cLxC5C3m-pTeQs1Qv4HSV/exec';
+
+  const USUARIOS_AUTORIZADOS = {
+  "danielalarcon": { pass: "jefeute", name: "Daniel Alarcon", role: "chofer" },
+  "marceloalarcon": { pass: "chofer001", name: "Marcelo Alarcon", role: "chofer" },
+  "natanaelalarcon": { pass: "tecnico001", name: "Natanael Alarcon", role: "salud" },
+  "yaninamolina": { pass: "tecnico002", name: "Yanina Molina", role: "salud" },
+  "emanuelmoser": { pass: "tecnico003", name: "Emanuel Moser", role: "salud" },
+  "diegoguerrero": { pass: "operador001", name: "Diego Guerrero", role: "operador" },
+  "lujangimenez": { pass: "operador002", name: "Lujan Gimenez", role: "operador" },
+};
+
+  window.historialPlanillas = [];
+
+  // Función para alternar el Modo Oscuro
+  function toggleDarkMode() {
+    const html = document.documentElement;
+    html.classList.toggle('dark');
+    const isDark = html.classList.contains('dark');
+    localStorage.setItem('ute_dark_mode', isDark ? 'enabled' : 'disabled');
+  }
+
+  window.handleLogin = function(e) {
+    e.preventDefault();
+    const userInput = document.getElementById('login-user').value.trim().toLowerCase();
+    const passInput = document.getElementById('login-pass').value.trim();
+    const btn = document.getElementById('btn-login-submit');
+
+    if (btn) btn.innerText = "Verificando...";
+
+    setTimeout(() => {
+      const userAccount = USUARIOS_AUTORIZADOS[userInput];
+      if (userAccount && userAccount.pass === passInput) {
+        localStorage.setItem('ute_session', JSON.stringify({
+          username: userInput,
+          name: userAccount.name,
+          role: userAccount.role
+        }));
+        iniciarSesionExitosa(userAccount.name, userAccount.role);
+      } else {
+        alert("Usuario o contraseña incorrectos.");
+        if (btn) btn.innerText = "Ingresar al Sistema";
+      }
+    }, 500);
+  };
+
+  window.logout = function() {
+    localStorage.removeItem('ute_session');
+    document.getElementById('auth-container').classList.remove('hidden');
+    document.getElementById('app-container').classList.add('hidden');
+    document.getElementById('login-user').value = '';
+    document.getElementById('login-pass').value = '';
+    const btn = document.getElementById('btn-login-submit');
+    if (btn) btn.innerText = "Ingresar al Sistema";
+  };
+
+  document.addEventListener("DOMContentLoaded", () => {
+    // Cargar preferencia de Dark Mode previa
+    if (localStorage.getItem('ute_dark_mode') === 'enabled') {
+      document.documentElement.classList.add('dark');
+    }
+
+    if (window.lucide) window.lucide.createIcons();
+
+    const savedSession = localStorage.getItem('ute_session');
+    if (savedSession) {
+      const data = JSON.parse(savedSession);
+      iniciarSesionExitosa(data.name, data.role);
+    } else {
+      let ultimoNum = parseInt(localStorage.getItem('ute_contador_emergencia') || '0');
+      if (ultimoNum === 0) {
+        ultimoNum = 1;
+        localStorage.setItem('ute_contador_emergencia', 1);
+      }
+      const inputEmergencia = document.getElementById('num-emergencia');
+      if (inputEmergencia && !inputEmergencia.value) {
+        inputEmergencia.value = ultimoNum;
+      }
+    }
+    updateTimestamps();
+  });
+
+  function iniciarSesionExitosa(name, role) {
+    document.getElementById('auth-container').classList.add('hidden');
+    document.getElementById('app-container').classList.remove('hidden');
+    document.getElementById('user-display-name').innerText = name;
+    document.getElementById('user-display-role').innerText = role === 'chofer' ? 'Chofer de Unidad' : (role === 'operador' ? 'Operador 107' : 'Personal de Salud');
+
+    updateTimestamps();
+
+    if (role === 'chofer') {
+      const navChofer = document.getElementById('nav-chofer');
+      if (navChofer) navChofer.classList.remove('hidden');
+      const viewSalud = document.getElementById('view-salud');
+      if (viewSalud) viewSalud.classList.add('hidden');
+      window.switchChoferView('relevo');
+    } else if (role === 'operador') {
+      const navChofer = document.getElementById('nav-chofer');
+      if (navChofer) navChofer.classList.add('hidden');
+      const viewSalud = document.getElementById('view-salud');
+      if (viewSalud) viewSalud.classList.add('hidden');
+      const vRelevo = document.getElementById('view-chofer-relevo');
+      if (vRelevo) vRelevo.classList.add('hidden');
+      const vMov = document.getElementById('view-chofer-movimiento');
+      if (vMov) vMov.classList.add('hidden');
+      const viewOperador = document.getElementById('view-operador');
+      if (viewOperador) viewOperador.classList.remove('hidden');
+      setTimeout(() => {
+        initCanvas('canvas-firma-saliente');
+        initCanvas('canvas-firma-entrante');
+      }, 100);
+    } else {
+      const navChofer = document.getElementById('nav-chofer');
+      if (navChofer) navChofer.classList.add('hidden');
+      const viewRelevo = document.getElementById('view-chofer-relevo');
+      if (viewRelevo) viewRelevo.classList.add('hidden');
+      const viewMovimiento = document.getElementById('view-chofer-movimiento');
+      if (viewMovimiento) viewMovimiento.classList.add('hidden');
+      const viewSalud = document.getElementById('view-salud');
+      if (viewSalud) viewSalud.classList.remove('hidden');
+
+      setTimeout(() => {
+        initCanvas('signature-pad-paramedico');
+        initCanvas('signature-pad-medico');
+        initCanvas('signature-pad-familiar');
+      }, 100);
+    }
+    if (window.lucide) window.lucide.createIcons();
+  }
+
+  window.togglePlanillasMenu = function() {
+    const menu = document.getElementById('planillas-dropdown-menu');
+    if (menu) menu.classList.toggle('hidden');
+  };
+
+  window.addEventListener('click', function(e) {
+    const menu = document.getElementById('planillas-dropdown-menu');
+    const button = menu ? menu.previousElementSibling : null;
+    if (menu && !menu.classList.contains('hidden') && !menu.contains(e.target) && button && !button.contains(e.target)) {
+      menu.classList.add('hidden');
+    }
+  });
+
+  window.cambiarVistaRapida = function(tipo) {
+    const menu = document.getElementById('planillas-dropdown-menu');
+    if (menu) menu.classList.add('hidden');
+
+    const viewSalud = document.getElementById('view-salud');
+    const navChofer = document.getElementById('nav-chofer');
+    const viewOperador = document.getElementById('view-operador');
+
+    if (viewSalud) viewSalud.classList.add('hidden');
+    if (navChofer) navChofer.classList.add('hidden');
+    if (viewOperador) viewOperador.classList.add('hidden');
+
+    const vRelevo = document.getElementById('view-chofer-relevo');
+    const vMov = document.getElementById('view-chofer-movimiento');
+    if (vRelevo) vRelevo.classList.add('hidden');
+    if (vMov) vMov.classList.add('hidden');
+
+    if (tipo === 'salud') {
+      if (viewSalud) viewSalud.classList.remove('hidden');
+      setTimeout(() => {
+        initCanvas('signature-pad-paramedico');
+        initCanvas('signature-pad-medico');
+        initCanvas('signature-pad-familiar');
+      }, 100);
+    } else if (tipo === 'chofer-relevo') {
+      if (navChofer) navChofer.classList.remove('hidden');
+      window.switchChoferView('relevo');
+    } else if (tipo === 'chofer-movimiento') {
+      if (navChofer) navChofer.classList.remove('hidden');
+      window.switchChoferView('movimiento');
+    } else if (tipo === 'operador') {
+      if (viewOperador) viewOperador.classList.remove('hidden');
+      setTimeout(() => {
+        initCanvas('canvas-firma-saliente');
+        initCanvas('canvas-firma-entrante');
+      }, 100);
+    }
+    if (window.lucide) window.lucide.createIcons();
+  };
+
+  function updateTimestamps() {
+    const str = new Date().toLocaleString('es-AR', { dateStyle: 'short', timeStyle: 'short' });
+    ['salud-fecha-hora', 'relevo-fecha-hora', 'movimiento-fecha-hora', 'operador-fecha-hora'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) {
+        if (el.tagName === 'INPUT') {
+          el.value = str;
+        } else {
+          el.innerText = str;
+        }
+      }
+    });
+  }
+
+  window.switchChoferView = function(view) {
+    const vRelevo = document.getElementById('view-chofer-relevo');
+    const vMov = document.getElementById('view-chofer-movimiento');
+    if (vRelevo) vRelevo.classList.toggle('hidden', view !== 'relevo');
+    if (vMov) vMov.classList.toggle('hidden', view === 'relevo');
+
+    const btnRelevo = document.getElementById('btn-nav-relevo');
+    const btnMov = document.getElementById('btn-nav-movimiento');
+    if (btnRelevo) btnRelevo.className = view === 'relevo' ? "px-4 py-2 text-sm font-bold bg-red-600 text-white rounded-lg shadow" : "px-4 py-2 text-sm font-bold bg-slate-200 text-slate-700 rounded-lg";
+    if (btnMov) btnMov.className = view !== 'relevo' ? "px-4 py-2 text-sm font-bold bg-red-600 text-white rounded-lg shadow" : "px-4 py-2 text-sm font-bold bg-slate-200 text-slate-700 rounded-lg";
+
+    setTimeout(() => {
+      if (view === 'relevo') {
+        initCanvas('canvas-chofer-entrante');
+        initCanvas('canvas-chofer-saliente');
+      } else {
+        initCanvas('canvas-chofer-mov');
+      }
+    }, 100);
+  };
+
+  function initCanvas(id) {
+    const canvas = document.getElementById(id);
+    if (!canvas) return;
+    if (canvas.clientWidth && canvas.clientHeight) {
+      canvas.width = canvas.clientWidth;
+      canvas.height = canvas.clientHeight;
+    }
+    const ctx = canvas.getContext('2d');
+    let drawing = false;
+
+    function start(e) { drawing = true; draw(e); }
+    function stop() { drawing = false; ctx.beginPath(); }
+    function draw(e) {
+      if (!drawing) return;
+      const rect = canvas.getBoundingClientRect();
+      const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+      const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+      ctx.lineWidth = 2;
+      ctx.lineCap = 'round';
+      ctx.strokeStyle = document.documentElement.classList.contains('dark') ? '#f1f5f9' : '#0f172a';
+      ctx.lineTo(clientX - rect.left, clientY - rect.top);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(clientX - rect.left, clientY - rect.top);
+    }
+
+    canvas.onmousedown = start; canvas.onmouseup = stop; canvas.onmousemove = draw;
+    canvas.ontouchstart = start; canvas.ontouchend = stop; canvas.ontouchmove = draw;
+  }
+
+  window.clearCanvas = function(id) {
+    const canvas = document.getElementById(id);
+    if (canvas) canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
+  };
+
+  window.clearSignature = function(id) {
+    window.clearCanvas(id);
+  };
+
+  window.addDamagePoint = function(e) {
+    const container = document.getElementById('body-map');
+    if (!container) return;
+    const rect = container.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+
+    const dot = document.createElement('div');
+    dot.className = 'damage-dot';
+    dot.style.left = `${x}px`;
+    dot.style.top = `${y}px`;
+    container.appendChild(dot);
+  };
+
+  window.clearDamagePoints = function() {
+    const container = document.getElementById('body-map');
+    if (container) container.querySelectorAll('.damage-dot').forEach(el => el.remove());
+  };
+
+  window.downloadPDF = function(formId, filename) {
+    const element = document.getElementById(formId);
+    if (element) html2pdf().set({ margin: 0.2, filename, image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2 } }).from(element).save();
+  };
+
+  window.generarNombreConFecha = function(prefijo) {
+    const ahora = new Date();
+    const dia = String(ahora.getDate()).padStart(2, '0');
+    const mes = String(ahora.getMonth() + 1).padStart(2, '0');
+    const anio = ahora.getFullYear();
+    const hora = String(ahora.getHours()).padStart(2, '0');
+    const minutos = String(ahora.getMinutes()).padStart(2, '0');
+
+    let usuarioNombre = "Usuario";
+    const savedSession = localStorage.getItem('ute_session');
+    if (savedSession) {
+      try {
+        const sessionData = JSON.parse(savedSession);
+        if (sessionData.name) {
+          usuarioNombre = sessionData.name.replace(/\s+/g, '_');
+        }
+      } catch (e) {
+        console.error("Error al leer la sesión:", e);
+      }
+    }
+    return `${prefijo}_${usuarioNombre}_${dia}-${mes}-${anio}_${hora}-${minutos}.pdf`;
+  };
+
+  window.incrementarContadorEmergencia = function() {
+    let ultimoNum = parseInt(localStorage.getItem('ute_contador_emergencia') || '0');
+    let siguienteNum = ultimoNum + 1;
+    localStorage.setItem('ute_contador_emergencia', siguienteNum);
+    const inputEmergencia = document.getElementById('num-emergencia');
+    if (inputEmergencia) inputEmergencia.value = siguienteNum;
+  };
+
+  window.sendPDFToDrive = async function(formId, filename, subjectText, evt) {
+    const eventButton = evt ? evt.currentTarget : null;
+    const originalHTML = eventButton ? eventButton.innerHTML : '';
+
+    if (eventButton) {
+      eventButton.disabled = true;
+      eventButton.className = "bg-emerald-600 text-white font-bold text-xs px-4 py-2 rounded-lg shadow flex items-center gap-2 transition-all opacity-80 cursor-not-allowed";
+      eventButton.innerHTML = `<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> Subiendo a Google Drive...`;
+      if (window.lucide) window.lucide.createIcons();
+    }
+
+    try {
+      const element = document.getElementById(formId);
+      if (!element) throw new Error(`No se encontró el formulario con ID: ${formId}`);
+
+      const opciones = {
+        margin: 0.2,
+        filename: filename,
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 2, useCORS: true, scrollY: 0 },
+        jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
+      };
+
+      const pdfBlob = await html2pdf().set(opciones).from(element).outputPdf('blob');
+
+      if (window.registrarEnHistorial && filename && pdfBlob) {
+        window.registrarEnHistorial(filename, pdfBlob);
+      }
+
+      const base64Data = await new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onloadend = () => resolve(reader.result.split(',')[1]);
+        reader.onerror = reject;
+        reader.readAsDataURL(pdfBlob);
+      });
+
+      const payload = { fileName: filename, fileData: base64Data, subject: subjectText, timestamp: new Date().toISOString() };
+
+      await fetch(GOOGLE_SCRIPT_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+
+      alert("¡Planilla guardada y subida exitosamente a Google Drive!");
+
+      if (formId === 'form-historia-clinica') {
+        if (typeof window.incrementarContadorEmergencia === 'function') window.incrementarContadorEmergencia();
+        document.getElementById(formId).reset();
+        if (typeof window.clearDamagePoints === 'function') window.clearDamagePoints();
+        window.clearCanvas('signature-pad-paramedico');
+        window.clearCanvas('signature-pad-medico');
+        window.clearCanvas('signature-pad-familiar');
+        if (typeof updateTimestamps === 'function') updateTimestamps();
+      }
+    } catch (error) {
+      console.error("Error al subir a Drive:", error);
+      alert("Hubo un error al procesar el archivo: " + error.message);
+    } finally {
+      if (eventButton) {
+        eventButton.disabled = false;
+        eventButton.className = "bg-red-600 hover:bg-red-700 text-white font-bold text-xs px-4 py-2 rounded-lg shadow flex items-center gap-2 transition-all";
+        eventButton.innerHTML = originalHTML;
+        if (window.lucide) window.lucide.createIcons();
+      }
+    }
+  };
+
+  window.agregarFilaTablaMovimientos = function() {
+    const tbody = document.getElementById('tbody-movimientos');
+    if (!tbody) return;
+    const nuevaFila = document.createElement('tr');
+    nuevaFila.innerHTML = `
+      <td class="border p-1"><input type="time" class="w-full p-1 bg-white border rounded"></td>
+      <td class="border p-1"><input type="number" class="w-full p-1 bg-white border rounded"></td>
+      <td class="border p-1"><input type="text" class="w-full p-1 bg-white border rounded"></td>
+      <td class="border p-1"><input type="time" class="w-full p-1 bg-white border rounded"></td>
+      <td class="border p-1"><input type="number" class="w-full p-1 bg-white border rounded"></td>
+      <td class="border p-1"><input type="text" class="w-full p-1 bg-white border rounded"></td>
+      <td class="border p-1"><input type="time" class="w-full p-1 bg-white border rounded"></td>
+      <td class="border p-1"><input type="number" class="w-full p-1 bg-white border rounded"></td>
+    `;
+    tbody.appendChild(nuevaFila);
+  };
+
+  window.toggleModalHistorial = function() {
+    const modal = document.getElementById('modal-historial');
+    if (modal) {
+      modal.classList.toggle('hidden');
+      if (!modal.classList.contains('hidden') && typeof lucide !== 'undefined') {
+        lucide.createIcons();
+      }
+    }
+  };
+
+  window.registrarEnHistorial = function(nombrePlanilla, pdfBlob = null) {
+    const fechaActual = new Date().toLocaleString();
+    const idUnico = Date.now();
+    let pdfUrl = null;
+    if (pdfBlob) pdfUrl = URL.createObjectURL(pdfBlob);
+
+    window.historialPlanillas.unshift({ id: idUnico, nombre: nombrePlanilla, fecha: fechaActual, url: pdfUrl });
+
+    ['contador-historial-badge-salud', 'contador-historial-badge-relevo', 'contador-historial-badge-mov', 'contador-historial-badge-operador'].forEach(id => {
+      const badge = document.getElementById(id);
+      if (badge) badge.textContent = window.historialPlanillas.length;
+    });
+    window.actualizarVistaHistorial();
+  };
+
+  window.actualizarVistaHistorial = function() {
+    const contenedorLista = document.getElementById('lista-historial-items');
+    if (!contenedorLista) return;
+
+    if (window.historialPlanillas.length === 0) {
+      contenedorLista.innerHTML = '<p class="text-slate-400 text-center text-xs py-4">No hay planillas generadas en esta sesión todavía.</p>';
+      return;
+    }
+
+    contenedorLista.innerHTML = window.historialPlanillas.map(item => `
+      <div onclick="window.abrirPDFHistorial(${item.id})" 
+           title="Haz clic para abrir el PDF"
+           class="flex items-center justify-between p-2.5 bg-white hover:bg-slate-50 border rounded-lg shadow-sm cursor-pointer transition-all border-slate-200 group">
+        <div class="flex items-center gap-2 overflow-hidden">
+          <i data-lucide="file-check" class="w-4 h-4 text-emerald-600 flex-shrink-0"></i>
+          <div class="truncate">
+            <p class="font-semibold text-slate-800 text-xs truncate group-hover:text-emerald-700 transition-colors">${item.nombre}</p>
+            <span class="text-[10px] text-slate-400 block">${item.fecha}</span>
+          </div>
+        </div>
+        <span class="bg-emerald-100 text-emerald-700 font-bold text-[10px] px-2 py-0.5 rounded border border-emerald-200 flex-shrink-0">Guardado</span>
+      </div>
+    `).join('');
+
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+  };
+
+  window.abrirPDFHistorial = function(id) {
+    const item = window.historialPlanillas.find(i => i.id === id);
+    if (item && item.url) window.open(item.url, '_blank');
+    else alert("El archivo previsualizado no está disponible.");
+  };
+
+  function toggleLugarDetalle(tipo) {
+    const campoViaPublica = document.getElementById('campo-via-publica');
+    const campoDomicilio = document.getElementById('campo-domicilio');
+    if (tipo === 'via_publica') {
+      campoViaPublica.classList.remove('hidden');
+      campoDomicilio.classList.add('hidden');
+    } else if (tipo === 'domicilio') {
+      campoDomicilio.classList.remove('hidden');
+      campoViaPublica.classList.add('hidden');
+    }
+  }
+
+  function previewVale(input, spanId) {
+    const labelSpan = document.getElementById(spanId);
+    if (input.files && input.files[0]) {
+      const fileName = input.files[0].name;
+      labelSpan.textContent = "✔ " + fileName;
+      labelSpan.classList.remove('text-slate-500');
+      labelSpan.classList.add('text-emerald-600', 'font-semibold');
+    } else {
+      labelSpan.textContent = "Sin archivo";
+      labelSpan.classList.remove('text-emerald-600', 'font-semibold');
+      labelSpan.classList.add('text-slate-500');
+    }
+  }
+
+  function toggleOtroDiagnostico(checkbox) {
+    const campoOtro = document.getElementById('campo-otro-diagnostico');
+    const inputOtro = document.getElementById('input-otro-diagnostico');
+    if (checkbox.checked) {
+      campoOtro.classList.remove('hidden');
+      inputOtro.focus();
+    } else {
+      campoOtro.classList.add('hidden');
+      inputOtro.value = '';
+    }
+  }
+
+  async function guardarPDF(nombreArchivo, idContenedor) {
+    const elemento = document.getElementById(idContenedor);
+    if (!elemento) {
+      alert(`Error: No se encontró el contenedor con ID "${idContenedor}"`);
+      return;
+    }
+    const opciones = {
+      margin: 0.5,
+      filename: nombreArchivo,
+      image: { type: 'jpeg', quality: 0.98 },
+      html2canvas: { scale: 2, useCORS: true, scrollY: 0 },
+      jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
+    };
+    try {
+      const pdfBlob = await html2pdf().set(opciones).from(elemento).outputPdf('blob');
+      if (!pdfBlob || pdfBlob.size === 0) throw new Error("El archivo PDF generado está vacío.");
+
+      if (typeof window.registrarEnHistorial === 'function') window.registrarEnHistorial(nombreArchivo, pdfBlob);
+
+      const url = URL.createObjectURL(pdfBlob);
+      const enlace = document.createElement('a');
+      enlace.href = url;
+      enlace.download = nombreArchivo;
+      document.body.appendChild(enlace);
+      enlace.click();
+
+      setTimeout(() => {
+        document.body.removeChild(enlace);
+        URL.revokeObjectURL(url);
+      }, 100);
+    } catch (error) {
+      console.error("Error al generar o descargar el PDF:", error);
+      alert("Hubo un problema al generar el archivo PDF.");
+    }
+  }
+
+  function iniciarRelojOperador() {
+    setInterval(() => {
+      const ahora = new Date();
+      const formatoFecha = ahora.toLocaleDateString('es-AR') + ' ' + ahora.toLocaleTimeString('es-AR');
+      const elClock = document.getElementById('clock-operador');
+      if (elClock) elClock.innerText = formatoFecha;
+    }, 1000);
+  }
+  document.addEventListener('DOMContentLoaded', iniciarRelojOperador);
+
+  window.generarNombreOperador = function(prefijo) {
+    const inputSaliente = document.querySelector('input[name="aclaracion_operador_saliente"]');
+    const inputEntrante = document.querySelector('input[name="aclaracion_operador_entrante"]');
+    let usuario = (inputSaliente && inputSaliente.value.trim()) || 
+                  (inputEntrante && inputEntrante.value.trim()) || 'Operador';
+    usuario = usuario.replace(/[^a-zA-Z0-9]/g, '_');
+    const ahora = new Date();
+    const fechaStr = ahora.toISOString().split('T')[0];
+    const horaStr = ahora.toTimeString().split(' ')[0].replace(/:/g, '-');
+    return `${prefijo}_${usuario}_${fechaStr}_${horaStr}.pdf`;
+  };
+
+  window.agregarFilaOperador = function() {
+    const tbody = document.getElementById('tabla-registros-operador');
+    const numFilas = tbody.children.length + 1;
+    const tr = document.createElement('tr');
+    tr.className = "border-b border-slate-200";
+    tr.innerHTML = `
+      <td class="border border-slate-300 p-1 text-center font-bold">${numFilas}</td>
+      <td class="border border-slate-300 p-1 space-y-1">
+        <input type="text" placeholder="Pedido (hs)" class="w-full border p-1 rounded text-[11px]">
+        <input type="time" placeholder="Hora Salida" class="w-full border p-1 rounded text-[11px]">
+        <input type="time" placeholder="Hora Llegada" class="w-full border p-1 rounded text-[11px]">
+      </td>
+      <td class="border border-slate-300 p-1 space-y-1">
+        <input type="text" placeholder="1- Apellido y Nombre" class="w-full border p-1 rounded text-[11px]">
+        <input type="text" placeholder="2- D.N.I." class="w-full border p-1 rounded text-[11px]">
+        <div class="flex gap-1">
+          <input type="text" placeholder="3- Edad" class="w-1/2 border p-1 rounded text-[11px]">
+          <input type="text" placeholder="4- Obra Social y N°" class="w-1/2 border p-1 rounded text-[11px]">
+        </div>
+      </td>
+      <td class="border border-slate-300 p-1 space-y-1">
+        <input type="text" placeholder="1- Lugar de la atención" class="w-full border p-1 rounded text-[11px]">
+        <input type="text" placeholder="2- Médico / Enfermero actuante" class="w-full border p-1 rounded text-[11px]">
+        <div class="flex gap-1">
+          <input type="text" placeholder="3- Chofer actuante" class="w-1/2 border p-1 rounded text-[11px]">
+          <input type="text" placeholder="4- Móvil actuante" class="w-1/2 border p-1 rounded text-[11px]">
+        </div>
+      </td>
+      <td class="border border-slate-300 p-1 space-y-1">
+        <input type="text" placeholder="1- DIAGNÓSTICO" class="w-full border p-1 rounded text-[11px]">
+        <input type="text" placeholder="2- Hospital Receptor" class="w-full border p-1 rounded text-[11px]">
+        <input type="text" placeholder="3- Médico Receptor" class="w-full border p-1 rounded text-[11px]">
+        <input type="text" placeholder="4- Observaciones" class="w-full border p-1 rounded text-[11px]">
+      </td>
+      <td class="border border-slate-300 p-1 text-center">
+        <button type="button" onclick="eliminarFilaOperador(this)" class="text-red-600 hover:text-red-800 font-bold">✕</button>
+      </td>
+    `;
+    tbody.appendChild(tr);
+  };
+
+  window.eliminarFilaOperador = function(btn) {
+    const row = btn.closest('tr');
+    row.remove();
+  };
+
+  window.limpiarCanvas = function(canvasId) {
+    window.clearCanvas(canvasId);
+  };
+</script>
+</body>
+</html>
